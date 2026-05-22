@@ -73,8 +73,8 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.HasOne(x => x.BaseUom).WithMany().HasForeignKey(x => x.BaseUomId);
 
         builder.HasMany(x => x.Tags)
-            .WithMany(x => x.Products)
-            .UsingEntity(j => j.ToTable("ProductTags"));
+            .WithMany(y => y.Products)
+            .UsingEntity(z => z.ToTable("ProductTags"));
     }
 }
 

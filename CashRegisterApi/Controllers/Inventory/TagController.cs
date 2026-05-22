@@ -1,4 +1,5 @@
 using Application.Inventory.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Inventory.Request;
 
@@ -9,6 +10,7 @@ namespace CashRegister.Controllers.Inventory;
 public class TagController(ITagUseCase tagUseCase) : ControllerBase
 {
     [HttpPost]
+    [Authorize (Policy = "LogisticsOnly")]
     public async Task<IActionResult> CreateTage([FromBody] CreateTagRequest request)
     {
         var response = await tagUseCase.CreateTag(request);
@@ -16,9 +18,18 @@ public class TagController(ITagUseCase tagUseCase) : ControllerBase
     }
 
     [HttpGet("Search")]
+    [Authorize (Policy = "LogisticsOnly")]
     public async Task<IActionResult> SearchTags([FromQuery] SearchTagRequest request)
     {
         var response = await tagUseCase.SearchTags(request);
         return Ok(response);
+    }
+
+    [HttpPut("{id}/Deactivate")]
+    [Authorize (Policy = "LogisticsOnly")]
+    public async Task<IActionResult> TagDeactivate([FromRoute] int id)
+    {
+        await tagUseCase.DeactivateTag(id);
+        return NoContent();
     }
 }

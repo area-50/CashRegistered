@@ -1,3 +1,4 @@
+using Domain.Inventory.Entities;
 using Shared.Inventory.Request;
 using Shared.Inventory.Response;
 using Shared.Request;
@@ -10,4 +11,8 @@ public interface ITagUseCase
     Task<CreateResponse> CreateTag(CreateTagRequest request);
     
     Task<PagedResponse<GetSearchTagResponse>> SearchTags(SearchTagRequest request);
+    
+    Task DeactivateTag(int tagId);
+    
+    Task<IEnumerable<Tag>> GetTagByIds(IList<int> tagIds);
 }

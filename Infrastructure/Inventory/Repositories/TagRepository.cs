@@ -24,9 +24,9 @@ public class TagRepository(CashRegisterDbContext context, ISqlUtils sqlUtils) : 
             .FirstOrDefaultAsync();
     }
 
-    public Task<IEnumerable<Tag>> FindAsync(Expression<Func<Tag, bool>> predicate)
+    public async Task<IEnumerable<Tag>> FindAsync(Expression<Func<Tag, bool>> predicate)
     {
-        throw new NotImplementedException();
+        return await context.Tags.Where(predicate).ToListAsync();
     }
 
     public void Update(Tag entity)

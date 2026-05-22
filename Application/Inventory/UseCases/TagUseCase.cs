@@ -51,4 +51,27 @@ public class TagUseCase(
             TotalCount = pagedTags.TotalCount
         };
     }
+
+    public async Task DeactivateTag(int tagId)
+    {
+        var tag = await repository.GetByIdAsync(tagId);
+
+        if (Tag.NotExists(tag, notificationContext)) return;
+
+        if (tag is {IsActive: false})
+        {
+            notificationContext.AddNotification("Desativar", "A tag já está inativa.");
+            return;
+        }
+        
+        tag!.Deactivate();
+        
+        repository.Update(tag);
+        await unitOfWork.CommitAsync();
+    }
+
+    public async Task<IEnumerable<Tag>> GetTagByIds(IList<int> tagIds)
+    {
+        return await repository.FindAsync(tag => tagIds.Contains(tag.Id));
+    }
 }

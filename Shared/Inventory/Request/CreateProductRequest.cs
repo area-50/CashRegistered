@@ -3,6 +3,8 @@ namespace Shared.Inventory.Request;
 public class CreateProductRequest
 {
     public string Name { get; set; }
+    
+    public string Sku { get; set; }
 
     public string? Description { get; set; }
 
@@ -10,7 +12,8 @@ public class CreateProductRequest
 
     public int CategoryId { get; set; }
 
-    public int BaseUom { get; set; }
+    public int BaseUomId { get; set; }
 
-    public decimal AverageCost { get; set; }
+    public IList<int> TagIds { get; set; } = new List<int>();
+
 }

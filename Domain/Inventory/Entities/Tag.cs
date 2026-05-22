@@ -1,5 +1,6 @@
 using Flunt.Br;
 using Shared.Abstractions;
+using Shared.Notifications;
 
 namespace Domain.Inventory.Entities;
 
@@ -27,5 +28,13 @@ public class Tag : BaseEntity
             .Requires()
             .IsNotNullOrEmpty(Name, "Nome", "O nome da tag é obrigatório.");
         AddNotifications(contract.Notifications);
+    }
+    
+    public static bool NotExists(Tag? tag, NotificationContext notificationContext)
+    {
+        if (tag != null) return false;
+        notificationContext.AddNotification("Tag", "A tag não existe");
+        return true;
+
     }
 }

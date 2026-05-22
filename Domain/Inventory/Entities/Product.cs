@@ -1,4 +1,6 @@
+using Flunt.Br;
 using Shared.Abstractions;
+using Shared.Notifications;
 
 namespace Domain.Inventory.Entities;
 
@@ -9,9 +11,9 @@ public class Product : BaseEntity
         string name,
         int categoryId,
         int baseUomId,
+        ICollection<Tag> tags,
         string? description = null,
-        string? ncmCode = null,
-        decimal averageCost = 0
+        string? ncmCode = null
     )
     {
         Sku = sku;
@@ -20,7 +22,9 @@ public class Product : BaseEntity
         BaseUomId = baseUomId;
         Description = description;
         NcmCode = ncmCode;
-        AverageCost = averageCost;
+        Tags = tags;
+        
+        EntityValidate();
     }
 
     protected Product() { }
@@ -46,4 +50,23 @@ public class Product : BaseEntity
     public ICollection<Tag> Tags { get; set; } = new List<Tag>();
     
     public ICollection<StockBalance> StockBalances { get; set; } = new List<StockBalance>();
+    
+    private void EntityValidate()
+    {
+        var contract = new Contract()
+            .Requires()
+            .IsNotNullOrEmpty(Name, "Nome", "O nome da produto é obrigatório.")
+            .IsGreaterThan(Name, 3, "Nome", "O nome deve conter mais que 3 caracteres.")
+            .IsNotNullOrEmpty(Sku, "Sku", "Sku é obrigatório.")
+            .IsGreaterThan(CategoryId, 0, "Categoria", "Categoria é obrigatória.")
+            .IsGreaterThan(BaseUomId, 0, "Unidade de medida", "Unidade de medida é obrigatória.");
+        AddNotifications(contract.Notifications);
+    }
+
+    public static bool NotExists(Product? tag, NotificationContext notificationContext)
+    {
+        if (tag != null) return false;
+        notificationContext.AddNotification("Produto", "O produto não existe.");
+        return true;
+    }
 }
