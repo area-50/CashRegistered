@@ -16,4 +16,21 @@ public class ProductController(IProductUseCase productUseCase) : ControllerBase
         var response = await productUseCase.CreateProduct(createProductRequest);
         return Ok(response);
     }
+
+    [HttpGet("Search")]
+    [Authorize(Policy = "LogisticsOnly")]
+    public async Task<IActionResult> SearchProducts([FromQuery] SearchProductRequest searchProductRequest)
+    {
+        var response = await productUseCase.SearchProducts(searchProductRequest);
+        return Ok(response);
+    }
+
+    [HttpPut("{productId}/Deactivate")]
+    [Authorize(Policy = "LogisticsOnly")]
+    public async Task<IActionResult> DeactivateProduct(int productId)
+    {
+        await productUseCase.Deactivate(productId);
+        return Ok();
+    }
+
 }

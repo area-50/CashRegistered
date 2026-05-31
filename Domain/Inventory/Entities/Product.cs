@@ -63,9 +63,9 @@ public class Product : BaseEntity
         AddNotifications(contract.Notifications);
     }
 
-    public static bool NotExists(Product? tag, NotificationContext notificationContext)
+    public static bool NotExists(Product? product, NotificationContext notificationContext)
     {
-        if (tag != null) return false;
+        if (product != null) return false;
         notificationContext.AddNotification("Produto", "O produto não existe.");
         return true;
     }
