@@ -1,8 +1,5 @@
-using System;
-using System.Threading.Tasks;
 using Application.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Security.Request;
 
@@ -24,7 +21,7 @@ public class AuthController(IAuthAppService authService) : ControllerBase
             Secure = true,
             SameSite = SameSiteMode.None,
             Path = "/",
-            Expires = DateTime.UtcNow.AddHours(2)
+            Expires = DateTime.UtcNow.AddDays(30)
         };
 
         Response.Cookies.Append("access_token", token, cookieOptions);
