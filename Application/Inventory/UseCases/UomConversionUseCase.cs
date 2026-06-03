@@ -72,6 +72,41 @@ public class UomConversionUseCase(
         };
     }
 
+    public async Task<GetUomConversionByIdResponse> GetUomConversionById(int uomId)
+    {
+        var uom = await repository.GetByIdAsync(uomId);
+
+        if (!UomConversion.UomConversionExists(uom, notificationContext)) return new GetUomConversionByIdResponse();
+
+        return new GetUomConversionByIdResponse
+        {
+            Id = uom!.Id,
+            FromUomId = uom.FromUomId,
+            ToUomId = uom.ToUomId,
+            Multiplier = uom.Multiplier,
+            ProductId = uom.ProductId,
+            IsActive = uom.IsActive
+        };
+    }
+
+    public async Task UpdateUomConversion(int id, UpdateUomConversionRequest request)
+    {
+        var uom = await repository.GetByIdAsync(id);
+
+        if (!UomConversion.UomConversionExists(uom, notificationContext)) return;
+
+        uom!.UpdateUomConversion(
+            request.FromUomId,
+            request.ToUomId,
+            request.Multiplier,
+            request.IsActive,
+            request.ProductId
+        );
+
+        repository.Update(uom);
+        await unitOfWork.CommitAsync();
+    }
+
     public async Task DeactivateUomConversion(int uomId)
     {
         var uom = await repository.GetByIdAsync(uomId);

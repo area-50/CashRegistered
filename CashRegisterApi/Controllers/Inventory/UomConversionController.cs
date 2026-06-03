@@ -38,4 +38,20 @@ public class UomConversionController(
         await   uomConversionCase.DeactivateUomConversion(id);
         return NoContent();
     }
+
+    [HttpGet("{id}/GetConversionById")]
+    [Authorize(Policy = "LogisticsOnly")]
+    public async Task<IActionResult> GetConversionById([FromRoute] int id)
+    {
+        var response = await uomConversionCase.GetUomConversionById(id);
+        return Ok(response);
+    }
+
+    [HttpPut("{id}/Update")]
+    [Authorize(Policy = "LogisticsOnly")]
+    public async Task<IActionResult> UpdateUomConversion([FromRoute] int id, [FromBody] UpdateUomConversionRequest request)
+    {
+        await uomConversionCase.UpdateUomConversion(id, request);
+        return Ok(new { id });
+    }
 }

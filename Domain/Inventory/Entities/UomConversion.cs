@@ -48,4 +48,23 @@ public class UomConversion : BaseEntity
             .AreNotEquals(Multiplier, 0, "Multiplicador", "Deve ser diferente de zero.");
         AddNotifications(contract.Notifications);
     }
+
+    public void UpdateUomConversion(
+        int fromUomId,
+        int toUomId,
+        decimal multiplier,
+        bool isActive,
+        int? productId = null)
+    {
+        FromUomId = fromUomId;
+        ToUomId = toUomId;
+        Multiplier = multiplier;
+        ProductId = productId;
+        if (isActive)
+            Activate();
+        else Deactivate();
+        
+        EntityValidate();
+        RegisterUpdate();
+    }
 }

@@ -67,14 +67,62 @@ public class ProductUseCase(
         };
     }
 
-    public async Task<Product?> GetProductById(int productId)
+    public async Task<Product?> GetById(int productId)
     {
         return await repository.GetByIdAsync(productId);
     }
 
+    public async Task<GetProductByIdResponse> GetProductById(int productId)
+    {
+        var product = await repository.GetByIdAsync(productId);
+
+        if (Product.NotExists(product, notificationContext)) return new GetProductByIdResponse();
+
+        return new GetProductByIdResponse
+        {
+            Id = product!.Id,
+            Name = product.Name,
+            Sku = product.Sku,
+            Description = product.Description,
+            NcmCode = product.NcmCode,
+            BaseUomId = product.BaseUomId,
+            CategoryId = product.CategoryId,
+            IsActive = product.IsActive,
+            TagIds = product.Tags.Select(t => t.Id).ToList()
+        };
+    }
+
+    public async Task UpdateProduct(int id, UpdateProductRequest request)
+    {
+        var product = await repository.GetByIdAsync(id);
+
+        if (Product.NotExists(product, notificationContext)) return;
+
+        var tagsSelected = await tagUseCase.GetTagByIds(request.TagIds);
+
+        product!.Name = request.Name;
+        product.Sku = request.Sku;
+        product.Description = request.Description;
+        product.NcmCode = request.NcmCode;
+        product.CategoryId = request.CategoryId;
+        product.BaseUomId = request.BaseUomId;
+        
+        if (request.IsActive) product.Activate(); else product.Deactivate();
+
+        // Atualização de Tags (Relacionamento Many-to-Many)
+        product.Tags.Clear();
+        foreach (var tag in tagsSelected)
+        {
+            product.Tags.Add(tag);
+        }
+
+        repository.Update(product);
+        await unitOfWork.CommitAsync();
+    }
+
     public async Task Deactivate(int productId)
     {
-        var product = await GetProductById(productId);
+        var product = await GetById(productId);
 
         if (Product.NotExists(product, notificationContext)) return;
 

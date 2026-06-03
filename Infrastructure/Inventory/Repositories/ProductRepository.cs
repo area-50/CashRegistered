@@ -24,9 +24,11 @@ public class ProductRepository(CashRegisterDbContext context, ISqlUtils sqlUtils
         await context.Products.AddAsync(entity);
     }
 
-    public Task<Product?> GetByIdAsync(int id)
+    public async Task<Product?> GetByIdAsync(int id)
     {
-        return context.Products.Where(p => p.Id == id).FirstOrDefaultAsync();
+        return await context.Products
+            .Include(p => p.Tags)
+            .Where(p => p.Id == id).FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<Product>> FindAsync(Expression<Func<Product, bool>> predicate)

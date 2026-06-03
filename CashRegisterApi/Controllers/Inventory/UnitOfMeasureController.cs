@@ -27,6 +27,22 @@ public class UnitOfMeasureController(
         return Ok(response);
     }
 
+    [HttpGet("{id}/GetUnitById")]
+    [Authorize(Policy = "LogisticsOnly")]
+    public async Task<IActionResult> GetUnitById([FromRoute] int id)
+    {
+        var response = await unitOfMeasureUseCase.GetUnitOfMeasureById(id);
+        return Ok(response);
+    }
+
+    [HttpPut("{id}/update")]
+    [Authorize(Policy = "LogisticsOnly")]
+    public async Task<IActionResult> UpdateUnitOfMeasure([FromRoute] int id, [FromBody] UpdateUnitOfMeasureRequest request)
+    {
+        await unitOfMeasureUseCase.UpdateUnitOfMeasure(id, request);
+        return NoContent();
+    }
+
     [HttpPut("{id}/deactivate")]
     [Authorize(Policy = "LogisticsOnly")]
     public async Task<IActionResult> DeactivateUnitOfMeasure([FromRoute] int id)

@@ -1,5 +1,4 @@
 using Domain.Inventory.Entities;
-using Microsoft.AspNetCore.Mvc;
 using Shared.Inventory.Request;
 using Shared.Inventory.Response;
 using Shared.Request;
@@ -13,7 +12,11 @@ public interface IProductUseCase
     
     Task<PagedResponse<GetSearchProductResponse>> SearchProducts(SearchProductRequest searchProductRequest);
     
-    Task<Product?> GetProductById(int productId);
+    Task<Product?> GetById(int productId);
+    
+    Task<GetProductByIdResponse> GetProductById(int productId);
+
+    Task UpdateProduct(int id, UpdateProductRequest request);
     
     Task Deactivate(int productId);
 }

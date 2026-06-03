@@ -15,4 +15,8 @@ public interface IUnitOfMeasureUseCase
     Task DeactivateUnitOfMeasure(int uomId);
     
     Task<UnitOfMeasure?> GetUomById(int uomId);
+    
+    Task<GetUnitOfMeasureByIdResponse> GetUnitOfMeasureById(int uomId);
+    
+    Task UpdateUnitOfMeasure(int id, UpdateUnitOfMeasureRequest request);
 }

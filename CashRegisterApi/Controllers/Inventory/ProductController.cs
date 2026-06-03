@@ -33,4 +33,19 @@ public class ProductController(IProductUseCase productUseCase) : ControllerBase
         return Ok();
     }
 
-}
+    [HttpGet("{id}/GetProductById")]
+    [Authorize(Policy = "LogisticsOnly")]
+    public async Task<IActionResult> GetProductById([FromRoute] int id)
+    {
+        var response = await productUseCase.GetProductById(id);
+        return Ok(response);
+    }
+
+    [HttpPut("{id}/Update")]
+    [Authorize(Policy = "LogisticsOnly")]
+    public async Task<IActionResult> UpdateProduct([FromRoute] int id, [FromBody] UpdateProductRequest request)
+    {
+        await productUseCase.UpdateProduct(id, request);
+        return Ok(new { id });
+    }
+    }

@@ -85,4 +85,37 @@ public class UnitOfMeasureUseCase(
     {
         return await repository.GetByIdAsync(uomId);
     }
+
+    public async Task<GetUnitOfMeasureByIdResponse> GetUnitOfMeasureById(int uomId)
+    {
+        var uom = await GetUomById(uomId);
+
+        if (!UnitOfMeasure.UomExists(uom, notificationContext)) return new GetUnitOfMeasureByIdResponse();
+
+        return new GetUnitOfMeasureByIdResponse
+        {
+            Id = uom!.Id,
+            Code = uom.Code,
+            Name = uom.Name,
+            AllowDecimals = uom.AllowDecimals,
+            IsActive = uom.IsActive
+        };
+    }
+
+    public async Task UpdateUnitOfMeasure(int id, UpdateUnitOfMeasureRequest request)
+    {
+        var uom = await GetUomById(id);
+
+        if (!UnitOfMeasure.UomExists(uom, notificationContext)) return;
+        
+        uom!.Code = request.Code;
+        uom.Name = request.Name;
+        uom.AllowDecimals = request.AllowDecimals;
+        
+        if (request.IsActive) uom.Activate();
+        else uom.Deactivate();
+        
+        repository.Update(uom);
+        await unitOfWork.CommitAsync();
+    }
 }
