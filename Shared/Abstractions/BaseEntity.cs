@@ -11,12 +11,10 @@ public abstract class BaseEntity : GeneralValidator
     public DateTime? UpdatedAt { get; private set; }
     public bool IsActive { get; private set; } = true;
     
-    // O sistema de notificações é comum a todoas entidades.
     private readonly List<Notification> _notifications = new();
     public IReadOnlyCollection<Notification> Notifications => _notifications.AsReadOnly();
     public bool IsInvalid => _notifications.Any();
-
-    // Método para atualizar o timestamp automaticamente
+    
     protected void RegisterUpdate()
     {
         UpdatedAt = DateTime.UtcNow;
