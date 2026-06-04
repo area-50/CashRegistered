@@ -32,6 +32,12 @@ public abstract class BaseEntity : GeneralValidator
         RegisterUpdate();
     }
 
+    protected void UpdateActivation(bool isActive)
+    {
+        if (isActive) Activate();
+        else Deactivate();
+    }
+
     protected void AddNotifications(IReadOnlyCollection<Notification> notifications)
     {
         _notifications.AddRange(notifications);

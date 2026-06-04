@@ -1,7 +1,6 @@
 using Domain.Inventory.Entities;
 using Shared.Inventory.Request;
 using Shared.Inventory.Response;
-using Shared.Request;
 using Shared.Response;
 
 namespace Application.Inventory.Interfaces;
@@ -18,5 +17,5 @@ public interface IUnitOfMeasureUseCase
     
     Task<GetUnitOfMeasureByIdResponse> GetUnitOfMeasureById(int uomId);
     
-    Task UpdateUnitOfMeasure(int id, UpdateUnitOfMeasureRequest request);
+    Task<UpdateResponse> UpdateUnitOfMeasure(int id, UpdateUnitOfMeasureRequest request);
 }

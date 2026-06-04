@@ -6,7 +6,7 @@ using Shared.Abstractions;
 using Shared.Identity.Request;
 using Shared.Identity.Response;
 using Shared.Notifications;
-using Shared.Request;
+using Shared.Response;
 using Shared.Validations;
 
 namespace Application.Identity.UseCases;

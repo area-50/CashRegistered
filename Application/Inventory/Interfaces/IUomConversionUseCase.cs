@@ -1,7 +1,6 @@
 using Domain.Inventory.Repositories;
 using Shared.Inventory.Request;
 using Shared.Inventory.Response;
-using Shared.Request;
 using Shared.Response;
 
 namespace Application.Inventory.Interfaces;
@@ -14,7 +13,7 @@ public interface IUomConversionUseCase
     
     Task<GetUomConversionByIdResponse> GetUomConversionById(int uomId);
 
-    Task UpdateUomConversion(int id, UpdateUomConversionRequest request);
+    Task<UpdateResponse> UpdateUomConversion(int id, UpdateUomConversionRequest request);
 
     Task DeactivateUomConversion(int uomId);
 }

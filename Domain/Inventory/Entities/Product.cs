@@ -69,4 +69,29 @@ public class Product : BaseEntity
         notificationContext.AddNotification("Produto", "O produto não existe.");
         return true;
     }
+
+    public void Update(
+        string sku,
+        string name,
+        int categoryId,
+        int baseUomId,
+        IEnumerable<Tag> tagsSelected,
+        bool isActive,
+        string? description = null,
+        string? ncmCode = null
+    )
+    {
+        Sku = sku;
+        Name = name;
+        CategoryId = categoryId;
+        BaseUomId = baseUomId;
+        Description = description;
+        NcmCode = ncmCode;
+        Tags.Clear();
+        foreach (var tag in tagsSelected) Tags.Add(tag);
+        
+        UpdateActivation(isActive);
+        EntityValidate();
+        RegisterUpdate();
+    }
 }

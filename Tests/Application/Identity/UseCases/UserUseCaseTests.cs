@@ -86,7 +86,7 @@ public class UserUseCaseTests
         var personRequest = new CreatePersonRequest { FirstName = "New", LastName = "Person" };
         
         _personUseCaseMock.Setup(x => x.CreatePerson(It.IsAny<CreatePersonRequest>()))
-            .ReturnsAsync(new Shared.Request.CreateResponse { Id = 2 });
+            .ReturnsAsync(new Shared.Response.CreateResponse { Id = 2 });
 
         // Act
         await _userUseCase.CreateUser(userRequest, personRequest);

@@ -5,7 +5,6 @@ using Shared.Abstractions;
 using Shared.Inventory.Request;
 using Shared.Inventory.Response;
 using Shared.Notifications;
-using Shared.Request;
 using Shared.Response;
 
 namespace Application.Inventory.UseCases;
@@ -76,7 +75,7 @@ public class UomConversionUseCase(
     {
         var uom = await repository.GetByIdAsync(uomId);
 
-        if (!UomConversion.UomConversionExists(uom, notificationContext)) return new GetUomConversionByIdResponse();
+        if (UomConversion.NotExists(uom, notificationContext)) return new GetUomConversionByIdResponse();
 
         return new GetUomConversionByIdResponse
         {
@@ -89,13 +88,13 @@ public class UomConversionUseCase(
         };
     }
 
-    public async Task UpdateUomConversion(int id, UpdateUomConversionRequest request)
+    public async Task<UpdateResponse> UpdateUomConversion(int id, UpdateUomConversionRequest request)
     {
         var uom = await repository.GetByIdAsync(id);
 
-        if (!UomConversion.UomConversionExists(uom, notificationContext)) return;
+        if (UomConversion.NotExists(uom, notificationContext)) return new UpdateResponse {Id = 0};
 
-        uom!.UpdateUomConversion(
+        uom!.Update(
             request.FromUomId,
             request.ToUomId,
             request.Multiplier,
@@ -105,13 +104,14 @@ public class UomConversionUseCase(
 
         repository.Update(uom);
         await unitOfWork.CommitAsync();
+        return new UpdateResponse {Id = uom.Id};
     }
 
     public async Task DeactivateUomConversion(int uomId)
     {
         var uom = await repository.GetByIdAsync(uomId);
 
-        if (!UomConversion.UomConversionExists(uom, notificationContext)) return;
+        if (UomConversion.NotExists(uom, notificationContext)) return;
         
         if (uom is { IsActive: false })
         {

@@ -39,8 +39,8 @@ public class UnitOfMeasureController(
     [Authorize(Policy = "LogisticsOnly")]
     public async Task<IActionResult> UpdateUnitOfMeasure([FromRoute] int id, [FromBody] UpdateUnitOfMeasureRequest request)
     {
-        await unitOfMeasureUseCase.UpdateUnitOfMeasure(id, request);
-        return NoContent();
+        var response = await unitOfMeasureUseCase.UpdateUnitOfMeasure(id, request);
+        return Ok(response);
     }
 
     [HttpPut("{id}/deactivate")]

@@ -45,7 +45,7 @@ public class ProductController(IProductUseCase productUseCase) : ControllerBase
     [Authorize(Policy = "LogisticsOnly")]
     public async Task<IActionResult> UpdateProduct([FromRoute] int id, [FromBody] UpdateProductRequest request)
     {
-        await productUseCase.UpdateProduct(id, request);
-        return Ok(new { id });
+        var response = await productUseCase.UpdateProduct(id, request);
+        return Ok(response);
     }
     }

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Shared.Identity.Request;
 using Shared.Identity.Response;
-using Shared.Request;
+using Shared.Response;
 using FluentAssertions;
 
 namespace Tests.CashRegisterApi.Controllers.Identity;

@@ -25,9 +25,25 @@ public class TagController(ITagUseCase tagUseCase) : ControllerBase
         return Ok(response);
     }
 
-    [HttpPut("{id}/Deactivate")]
-    [Authorize (Policy = "LogisticsOnly")]
-    public async Task<IActionResult> TagDeactivate([FromRoute] int id)
+    [HttpGet("{id}/GetTagById")]
+    [Authorize(Policy = "LogisticsOnly")]
+    public async Task<IActionResult> GetTagById([FromRoute] int id)
+    {
+        var response = await tagUseCase.GetTagByIdResponse(id);
+        return Ok(response);
+    }
+
+    [HttpPut("{id}/update")]
+    [Authorize(Policy = "LogisticsOnly")]
+    public async Task<IActionResult> UpdateTag([FromRoute] int id, [FromBody] UpdateTagRequest request)
+    {
+        var response = await tagUseCase.UpdateTag(id, request);
+        return Ok(response);
+    }
+
+    [HttpPut("{id}/deactivate")]
+    [Authorize(Policy = "LogisticsOnly")]
+    public async Task<IActionResult> DeactivateTag([FromRoute] int id)
     {
         await tagUseCase.DeactivateTag(id);
         return NoContent();

@@ -6,7 +6,6 @@ using Shared.Abstractions;
 using Shared.Inventory.Request;
 using Shared.Inventory.Response;
 using Shared.Notifications;
-using Shared.Request;
 using Shared.Response;
 
 namespace Application.Inventory.UseCases;
@@ -92,32 +91,28 @@ public class ProductUseCase(
         };
     }
 
-    public async Task UpdateProduct(int id, UpdateProductRequest request)
+    public async Task<UpdateResponse> UpdateProduct(int id, UpdateProductRequest request)
     {
         var product = await repository.GetByIdAsync(id);
 
-        if (Product.NotExists(product, notificationContext)) return;
+        if (Product.NotExists(product, notificationContext)) return new UpdateResponse {Id = 0};
 
         var tagsSelected = await tagUseCase.GetTagByIds(request.TagIds);
 
-        product!.Name = request.Name;
-        product.Sku = request.Sku;
-        product.Description = request.Description;
-        product.NcmCode = request.NcmCode;
-        product.CategoryId = request.CategoryId;
-        product.BaseUomId = request.BaseUomId;
+        product!.Update(
+            request.Sku,
+            request.Name,
+            request.CategoryId,
+            request.BaseUomId,
+            tagsSelected.ToList(),
+            request.IsActive,
+            request.Description,
+            request.NcmCode
+        );
         
-        if (request.IsActive) product.Activate(); else product.Deactivate();
-
-        // Atualização de Tags (Relacionamento Many-to-Many)
-        product.Tags.Clear();
-        foreach (var tag in tagsSelected)
-        {
-            product.Tags.Add(tag);
-        }
-
         repository.Update(product);
         await unitOfWork.CommitAsync();
+        return new UpdateResponse { Id = product.Id };
     }
 
     public async Task Deactivate(int productId)

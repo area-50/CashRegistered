@@ -1,7 +1,6 @@
 using Domain.Inventory.Entities;
 using Shared.Inventory.Request;
 using Shared.Inventory.Response;
-using Shared.Request;
 using Shared.Response;
 
 namespace Application.Inventory.Interfaces;
@@ -16,7 +15,7 @@ public interface IProductUseCase
     
     Task<GetProductByIdResponse> GetProductById(int productId);
 
-    Task UpdateProduct(int id, UpdateProductRequest request);
+    Task<UpdateResponse> UpdateProduct(int id, UpdateProductRequest request);
     
     Task Deactivate(int productId);
 }

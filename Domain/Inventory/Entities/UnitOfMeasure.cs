@@ -40,11 +40,11 @@ public class UnitOfMeasure : BaseEntity
         return true;
     }
 
-    public static bool UomExists(UnitOfMeasure? uom,  NotificationContext notificationContext)
+    public static bool NotExists(UnitOfMeasure? uom,  NotificationContext notificationContext)
     {
-        if (uom != null) return true;
+        if (uom != null) return false;
         notificationContext.AddNotification("Unidade de Medida", "Unidade de Medida não existe");
-        return false;
+        return true;
     }
 
     private void EntityValidate()
@@ -62,5 +62,16 @@ public class UnitOfMeasure : BaseEntity
                 "Nome da unidade de medida é obrigatório."
             );
         AddNotifications(contract.Notifications);
+    }
+
+    public void Update(string code, string name, bool isActive, bool allowDecimals = false)
+    {
+        Code = code;
+        Name = name;
+        AllowDecimals = allowDecimals;
+        
+        UpdateActivation(isActive);
+        EntityValidate();
+        RegisterUpdate();
     }
 }

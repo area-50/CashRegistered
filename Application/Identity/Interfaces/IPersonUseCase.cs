@@ -1,7 +1,7 @@
 using Domain.Identity.Entities;
 using Shared.Identity.Request;
 using Shared.Identity.Response;
-using Shared.Request;
+using Shared.Response;
 
 namespace Application.Identity.Interfaces;
 

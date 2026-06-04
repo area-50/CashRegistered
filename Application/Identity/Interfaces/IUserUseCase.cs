@@ -1,7 +1,6 @@
 using Domain.Identity.Entities;
 using Shared.Identity.Request;
 using Shared.Security.Request;
-using Shared.Request;
 using Shared.Identity.Response;
 using Shared.Response;
 

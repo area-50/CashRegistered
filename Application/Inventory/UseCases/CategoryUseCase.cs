@@ -5,7 +5,6 @@ using Shared.Abstractions;
 using Shared.Inventory.Request;
 using Shared.Inventory.Response;
 using Shared.Notifications;
-using Shared.Request;
 using Shared.Response;
 
 namespace Application.Inventory.UseCases;

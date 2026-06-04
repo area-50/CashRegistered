@@ -5,7 +5,6 @@ using Shared.Abstractions;
 using Shared.Inventory.Request;
 using Shared.Inventory.Response;
 using Shared.Notifications;
-using Shared.Request;
 using Shared.Response;
 
 namespace Application.Inventory.UseCases;
@@ -67,7 +66,7 @@ public class UnitOfMeasureUseCase(
     {
         var uom = await GetUomById(uomId);
 
-        if (!UnitOfMeasure.UomExists(uom, notificationContext)) return;
+        if (UnitOfMeasure.NotExists(uom, notificationContext)) return;
 
         if (uom is { IsActive: false })
         {
@@ -90,7 +89,7 @@ public class UnitOfMeasureUseCase(
     {
         var uom = await GetUomById(uomId);
 
-        if (!UnitOfMeasure.UomExists(uom, notificationContext)) return new GetUnitOfMeasureByIdResponse();
+        if (UnitOfMeasure.NotExists(uom, notificationContext)) return new GetUnitOfMeasureByIdResponse();
 
         return new GetUnitOfMeasureByIdResponse
         {
@@ -102,20 +101,21 @@ public class UnitOfMeasureUseCase(
         };
     }
 
-    public async Task UpdateUnitOfMeasure(int id, UpdateUnitOfMeasureRequest request)
+    public async Task<UpdateResponse> UpdateUnitOfMeasure(int id, UpdateUnitOfMeasureRequest request)
     {
         var uom = await GetUomById(id);
 
-        if (!UnitOfMeasure.UomExists(uom, notificationContext)) return;
+        if (UnitOfMeasure.NotExists(uom, notificationContext)) return new UpdateResponse {Id = 0};
         
-        uom!.Code = request.Code;
-        uom.Name = request.Name;
-        uom.AllowDecimals = request.AllowDecimals;
-        
-        if (request.IsActive) uom.Activate();
-        else uom.Deactivate();
+        uom!.Update(
+            request.Code,
+            request.Name,
+            request.IsActive,
+            request.AllowDecimals
+        );
         
         repository.Update(uom);
         await unitOfWork.CommitAsync();
+        return new UpdateResponse {Id = uom.Id};
     }
 }

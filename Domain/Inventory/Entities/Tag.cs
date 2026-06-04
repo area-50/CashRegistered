@@ -37,4 +37,14 @@ public class Tag : BaseEntity
         return true;
 
     }
+
+    public void Update(string name, bool isActive, string? hexColor = null)
+    {
+        Name = name;
+        HexColor = hexColor;
+        
+        UpdateActivation(isActive);
+        EntityValidate();
+        RegisterUpdate();
+    }
 }

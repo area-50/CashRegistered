@@ -5,7 +5,6 @@ using Shared.Abstractions;
 using Shared.Inventory.Request;
 using Shared.Inventory.Response;
 using Shared.Notifications;
-using Shared.Request;
 using Shared.Response;
 
 namespace Application.Inventory.UseCases;
@@ -68,6 +67,39 @@ public class TagUseCase(
         
         repository.Update(tag);
         await unitOfWork.CommitAsync();
+    }
+
+    public async Task<Tag?> GetTagById(int tagId)
+    {
+        return await repository.GetByIdAsync(tagId);
+    }
+
+    public async Task<GetTagByIdResponse> GetTagByIdResponse(int tagId)
+    {
+        var tag = await GetTagById(tagId);
+
+        if (Tag.NotExists(tag, notificationContext)) return new GetTagByIdResponse();
+
+        return new GetTagByIdResponse
+        {
+            Id = tag!.Id,
+            Name = tag.Name,
+            ColorHex = tag.HexColor,
+            IsActive = tag.IsActive
+        };
+    }
+
+    public async Task<UpdateResponse> UpdateTag(int id, UpdateTagRequest request)
+    {
+        var tag = await GetTagById(id);
+
+        if (Tag.NotExists(tag, notificationContext)) return new UpdateResponse {Id = 0};
+        
+        tag!.Update(request.Name, request.IsActive, request.ColorHex);
+        
+        repository.Update(tag);
+        await unitOfWork.CommitAsync();
+        return new UpdateResponse {Id = tag.Id};
     }
 
     public async Task<IEnumerable<Tag>> GetTagByIds(IList<int> tagIds)

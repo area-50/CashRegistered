@@ -35,5 +35,7 @@ public static class DependencyInjectionUseCases
         services.AddScoped<ITagUseCase, TagUseCase>();
         
         services.AddScoped<IProductUseCase, ProductUseCase>();
+        
+        services.AddScoped<IWarehouseUseCase, WarehouseUseCase>();
     }
 }

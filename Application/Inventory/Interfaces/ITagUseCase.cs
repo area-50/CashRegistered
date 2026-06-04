@@ -1,7 +1,6 @@
 using Domain.Inventory.Entities;
 using Shared.Inventory.Request;
 using Shared.Inventory.Response;
-using Shared.Request;
 using Shared.Response;
 
 namespace Application.Inventory.Interfaces;
@@ -14,5 +13,11 @@ public interface ITagUseCase
     
     Task DeactivateTag(int tagId);
     
+    Task<Tag?> GetTagById(int tagId);
+
+    Task<GetTagByIdResponse> GetTagByIdResponse(int tagId);
+
+    Task<UpdateResponse> UpdateTag(int id, UpdateTagRequest request);
+
     Task<IEnumerable<Tag>> GetTagByIds(IList<int> tagIds);
 }

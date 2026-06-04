@@ -6,7 +6,7 @@ using Flunt.Notifications;
 using Shared.Identity.Request;
 using Shared.Security.Request;
 using Shared.Financial.Request;
-using Shared.Request;
+using Shared.Response;
 using Shared.Identity.Response;
 using Shared.Security.Response;
 using Shared.Financial.Response;

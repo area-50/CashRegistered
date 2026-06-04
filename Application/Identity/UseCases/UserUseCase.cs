@@ -6,7 +6,6 @@ using Domain.Identity.Repositories;
 using Shared.Abstractions;
 using Shared.Identity.Request;
 using Shared.Security.Request;
-using Shared.Request;
 using Shared.Identity.Response;
 using Shared.Response;
 using Shared.Notifications;

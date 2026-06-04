@@ -15,6 +15,7 @@
 
     <ItemGroup>
       <Folder Include="Entities\" />
+      <Folder Include="Request\" />
     </ItemGroup>
 
 </Project>

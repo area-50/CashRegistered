@@ -32,11 +32,11 @@ public class UomConversion : BaseEntity
     
     public Product? Product { get; set; }
 
-    public static bool UomConversionExists(UomConversion? uom, NotificationContext notificationContext)
+    public static bool NotExists(UomConversion? uom, NotificationContext notificationContext)
     {
-        if (uom != null) return true;
+        if (uom != null) return false;
         notificationContext.AddNotification("Regra de conversão", "Regra de conversão não existe.");
-        return false;
+        return true;
     }
 
     private void EntityValidate()
@@ -49,7 +49,7 @@ public class UomConversion : BaseEntity
         AddNotifications(contract.Notifications);
     }
 
-    public void UpdateUomConversion(
+    public void Update(
         int fromUomId,
         int toUomId,
         decimal multiplier,
@@ -60,10 +60,8 @@ public class UomConversion : BaseEntity
         ToUomId = toUomId;
         Multiplier = multiplier;
         ProductId = productId;
-        if (isActive)
-            Activate();
-        else Deactivate();
         
+        UpdateActivation(isActive);
         EntityValidate();
         RegisterUpdate();
     }

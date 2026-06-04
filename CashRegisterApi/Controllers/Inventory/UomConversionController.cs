@@ -51,7 +51,7 @@ public class UomConversionController(
     [Authorize(Policy = "LogisticsOnly")]
     public async Task<IActionResult> UpdateUomConversion([FromRoute] int id, [FromBody] UpdateUomConversionRequest request)
     {
-        await uomConversionCase.UpdateUomConversion(id, request);
-        return Ok(new { id });
+        var response = await uomConversionCase.UpdateUomConversion(id, request);
+        return Ok(response);
     }
 }
