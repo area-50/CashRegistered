@@ -13,6 +13,8 @@ namespace Application.Inventory.UseCases;
 public class ProductUseCase(
     ITagUseCase tagUseCase,
     IProductRepository repository,
+    IStockBalanceUseCase stockBalanceUseCase,
+    IWarehouseUseCase warehouseUseCase,
     NotificationContext notificationContext,
     IUnitOfWork unitOfWork
 ) : IProductUseCase
@@ -38,10 +40,18 @@ public class ProductUseCase(
         }
         
         await repository.CreateAsync(product);
+        
+        var warehouses = await warehouseUseCase.ListAll();
+        var stockBalances = warehouses.Select(w => 
+            new StockBalance(product.Id, w.Id)
+        );
+        await stockBalanceUseCase.AddRangeAsync(stockBalances);
+
         await unitOfWork.CommitAsync();
         
         return new CreateResponse {Id = product.Id};
     }
+
 
     public async Task<PagedResponse<GetSearchProductResponse>> SearchProducts(SearchProductRequest searchProductRequest)
     {
