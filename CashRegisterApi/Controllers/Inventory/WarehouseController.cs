@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Inventory.Request;
 
-namespace CashRegisterApi.Controllers.Inventory;
+namespace CashRegister.Controllers.Inventory;
 
 [ApiController]
 [Route("api/warehouses")]

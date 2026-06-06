@@ -39,11 +39,20 @@ public class Category : BaseEntity
         AddNotifications(contract.Notifications);
     }
 
-    public static bool CategoryExists(Category? category, NotificationContext notificationContext)
+    public void Update(string name, int? parentCategoryId, bool isActive)
     {
-        if (category != null) return true;
-        notificationContext.AddNotification("Categoria", "Categoria não existe");
-        return false;
+        Name = name;
+        ParentCategoryId = parentCategoryId;
+        
+        UpdateActivation(isActive);
+        EntityValidate();
+        RegisterUpdate();
+    }
 
+    public static bool NotExists(Category? category, NotificationContext notificationContext)
+    {
+        if (category != null) return false;
+        notificationContext.AddNotification("Categoria", "A categoria não existe.");
+        return true;
     }
 }

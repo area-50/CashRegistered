@@ -65,7 +65,7 @@ public class CategoryUseCase(
     {
         var category = await repository.GetByIdAsync(categoryId);
         
-        if (!Category.CategoryExists(category, notificationContext)) return;
+        if (Category.NotExists(category, notificationContext)) return;
 
         if (category is {IsActive: false})
         {
@@ -82,5 +82,39 @@ public class CategoryUseCase(
     public async Task<Category?> GetCategoryById(int categoryId)
     {
         return await repository.GetByIdAsync(categoryId);
+    }
+
+    public async Task<GetCategoryByIdResponse> GetCategoryByIdResponse(int categoryId)
+    {
+        var category = await GetCategoryById(categoryId);
+
+        if (Category.NotExists(category, notificationContext)) return new GetCategoryByIdResponse();
+
+        return new GetCategoryByIdResponse
+        {
+            Id = category!.Id,
+            Name = category.Name,
+            ParentCategoryId = category.ParentCategoryId,
+            IsActive = category.IsActive
+        };
+    }
+
+    public async Task<UpdateResponse> UpdateCategory(int id, UpdateCategoryRequest request)
+    {
+        var category = await GetCategoryById(id);
+
+        if (Category.NotExists(category, notificationContext)) return new UpdateResponse { Id = 0 };
+
+        category!.Update(request.Name, request.ParentCategoryId, request.IsActive);
+
+        if (category.IsInvalid)
+        {
+            notificationContext.AddNotifications(category.Notifications);
+            return new UpdateResponse { Id = 0 };
+        }
+
+        repository.Update(category);
+        await unitOfWork.CommitAsync();
+        return new UpdateResponse { Id = category.Id };
     }
 }

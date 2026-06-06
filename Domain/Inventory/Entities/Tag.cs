@@ -33,9 +33,8 @@ public class Tag : BaseEntity
     public static bool NotExists(Tag? tag, NotificationContext notificationContext)
     {
         if (tag != null) return false;
-        notificationContext.AddNotification("Tag", "A tag não existe");
+        notificationContext.AddNotification("Tag", "A tag não existe.");
         return true;
-
     }
 
     public void Update(string name, bool isActive, string? hexColor = null)

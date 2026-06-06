@@ -96,6 +96,12 @@ public class TagUseCase(
         if (Tag.NotExists(tag, notificationContext)) return new UpdateResponse {Id = 0};
         
         tag!.Update(request.Name, request.IsActive, request.ColorHex);
+
+        if (tag.IsInvalid)
+        {
+            notificationContext.AddNotifications(tag.Notifications);
+            return new UpdateResponse { Id = 0 };
+        }
         
         repository.Update(tag);
         await unitOfWork.CommitAsync();

@@ -1,10 +1,10 @@
 namespace Shared.Inventory.Request;
 
-public class UpdateTagRequest
+public class UpdateCategoryRequest
 {
     public string Name { get; set; } = string.Empty;
-    
-    public string? ColorHex { get; set; }
+
+    public int? ParentCategoryId { get; set; }
 
     public bool IsActive { get; set; }
 }

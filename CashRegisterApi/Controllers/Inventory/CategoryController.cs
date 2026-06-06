@@ -7,27 +7,41 @@ namespace CashRegister.Controllers.Inventory;
 
 [Route("api/[controller]")]
 [ApiController]
-public class CategoryController(
-    ICategoryUseCase categoryUseCase    
-) : ControllerBase
+public class CategoryController(ICategoryUseCase categoryUseCase) : ControllerBase
 {
     [HttpPost]
-    [Authorize (Policy = "LogisticsOnly")]
+    [Authorize(Policy = "LogisticsOnly")]
     public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryRequest request)
     {
         var response = await categoryUseCase.CreateCategory(request);
         return Ok(response);
     }
     
-    [HttpGet("search")]
-    [Authorize (Policy = "LogisticsOnly")]
+    [HttpGet("Search")]
+    [Authorize(Policy = "LogisticsOnly")]
     public async Task<IActionResult> GetSearchCategory([FromQuery] SearchCategoryRequest request)
     {
         var response = await categoryUseCase.GetSearchCategories(request);
         return Ok(response);
     }
 
-    [HttpPut("{id}/deactivate")]
+    [HttpGet("{id}/GetCategoryById")]
+    [Authorize(Policy = "LogisticsOnly")]
+    public async Task<IActionResult> GetCategoryById([FromRoute] int id)
+    {
+        var response = await categoryUseCase.GetCategoryByIdResponse(id);
+        return Ok(response);
+    }
+
+    [HttpPut("{id}/Update")]
+    [Authorize(Policy = "LogisticsOnly")]
+    public async Task<IActionResult> UpdateCategory([FromRoute] int id, [FromBody] UpdateCategoryRequest request)
+    {
+        var response = await categoryUseCase.UpdateCategory(id, request);
+        return Ok(response);
+    }
+
+    [HttpPut("{id}/Deactivate")]
     [Authorize(Policy = "LogisticsOnly")]
     public async Task<IActionResult> DeactivateCategory([FromRoute] int id)
     {

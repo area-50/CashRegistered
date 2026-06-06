@@ -10,15 +10,15 @@ namespace CashRegister.Controllers.Inventory;
 public class TagController(ITagUseCase tagUseCase) : ControllerBase
 {
     [HttpPost]
-    [Authorize (Policy = "LogisticsOnly")]
-    public async Task<IActionResult> CreateTage([FromBody] CreateTagRequest request)
+    [Authorize(Policy = "LogisticsOnly")]
+    public async Task<IActionResult> CreateTag([FromBody] CreateTagRequest request)
     {
         var response = await tagUseCase.CreateTag(request);
         return Ok(response);
     }
 
     [HttpGet("Search")]
-    [Authorize (Policy = "LogisticsOnly")]
+    [Authorize(Policy = "LogisticsOnly")]
     public async Task<IActionResult> SearchTags([FromQuery] SearchTagRequest request)
     {
         var response = await tagUseCase.SearchTags(request);
@@ -33,7 +33,7 @@ public class TagController(ITagUseCase tagUseCase) : ControllerBase
         return Ok(response);
     }
 
-    [HttpPut("{id}/update")]
+    [HttpPut("{id}/Update")]
     [Authorize(Policy = "LogisticsOnly")]
     public async Task<IActionResult> UpdateTag([FromRoute] int id, [FromBody] UpdateTagRequest request)
     {
@@ -41,11 +41,11 @@ public class TagController(ITagUseCase tagUseCase) : ControllerBase
         return Ok(response);
     }
 
-    [HttpPut("{id}/deactivate")]
+    [HttpPut("{id}/Deactivate")]
     [Authorize(Policy = "LogisticsOnly")]
     public async Task<IActionResult> DeactivateTag([FromRoute] int id)
     {
         await tagUseCase.DeactivateTag(id);
-        return NoContent();
+        return Ok();
     }
 }
