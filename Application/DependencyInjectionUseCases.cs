@@ -6,6 +6,9 @@ using Application.Security.UseCases;
 using Application.Financial.UseCases;
 using Application.Inventory.Interfaces;
 using Application.Inventory.UseCases;
+using Application.Interfaces;
+using Application.Services;
+using Application.Services.Strategies;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application;
@@ -39,5 +42,13 @@ public static class DependencyInjectionUseCases
         services.AddScoped<IWarehouseUseCase, WarehouseUseCase>();
         
         services.AddScoped<IStockBalanceUseCase, StockBalanceUseCase>();
+        
+        services.AddScoped<IPersistenceExceptionStrategy, UniqueConstraintStrategy>();
+        
+        services.AddScoped<IPersistenceExceptionStrategy, ForeignKeyViolationStrategy>();
+        
+        services.AddScoped<IPersistenceExceptionStrategy, InfrastructureFailureStrategy>();
+        
+        services.AddScoped<PersistenceExceptionHandler>();
     }
 }
