@@ -13,8 +13,12 @@ public class AuthController(IAuthAppService authService) : ControllerBase
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
         var response = await authService.Login(request);
-        var token = response.AccessToken;
-        if (token.Length <= 0) return Unauthorized();
+        
+        if (string.IsNullOrEmpty(response.AccessToken))
+        {
+            return BadRequest();
+        }
+
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
@@ -24,9 +28,13 @@ public class AuthController(IAuthAppService authService) : ControllerBase
             Expires = DateTime.UtcNow.AddDays(30)
         };
 
-        Response.Cookies.Append("access_token", token, cookieOptions);
+        Response.Cookies.Append("access_token", response.AccessToken, cookieOptions);
+        Response.Cookies.Append("refresh_token", response.RefreshToken, cookieOptions);
         
-        return Ok(new {response.Id, response.UserName, response.Role});
+        return Ok(new Shared.Response.ApiResponse<object>
+        {
+            Data = new { response.Id, response.UserName, response.Role }
+        });
     }
     
     [HttpPost("logout")]
@@ -37,8 +45,46 @@ public class AuthController(IAuthAppService authService) : ControllerBase
         {
             Path = "/"
         });
+        Response.Cookies.Delete("refresh_token", new CookieOptions
+        {
+            Path = "/"
+        });
 
         return Ok(new { message = "Sessão encerrada com sucesso." });
+    }
+    
+    [HttpPost("refresh")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Refresh()
+    {
+        if (!Request.Cookies.TryGetValue("refresh_token", out var refreshToken))
+        {
+            return BadRequest(new { message = "Refresh token não fornecido." });
+        }
+
+        var response = await authService.RefreshToken(refreshToken);
+
+        if (string.IsNullOrEmpty(response.AccessToken))
+        {
+            return Unauthorized(new { message = "Refresh token inválido ou expirado." });
+        }
+
+        var cookieOptions = new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.None,
+            Path = "/",
+            Expires = DateTime.UtcNow.AddDays(30)
+        };
+
+        Response.Cookies.Append("access_token", response.AccessToken, cookieOptions);
+        Response.Cookies.Append("refresh_token", response.RefreshToken, cookieOptions);
+
+        return Ok(new Shared.Response.ApiResponse<object>
+        {
+            Data = new { response.Id, response.UserName, response.Role }
+        });
     }
     
     [HttpGet("verify")]

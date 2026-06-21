@@ -94,4 +94,6 @@ public class Product : BaseEntity
         EntityValidate();
         RegisterUpdate();
     }
+
+    public bool IdIsZero() => Id == 0;
 }

@@ -24,7 +24,11 @@ public class NotificationMiddleware(RequestDelegate next)
                 Message = n.Message
             });
 
-            var responseJson = JsonSerializer.Serialize(new { errors = notifications });
+            var responseJson = JsonSerializer.Serialize(new Shared.Response.ApiResponse<object>
+            {
+                Success = false,
+                Errors = notifications
+            });
             await context.Response.WriteAsync(responseJson);
         }
     }

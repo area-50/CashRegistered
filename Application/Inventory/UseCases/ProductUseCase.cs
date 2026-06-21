@@ -40,13 +40,23 @@ public class ProductUseCase(
         }
         
         await repository.CreateAsync(product);
+        await unitOfWork.CommitAsync();
+
+        if (product.IdIsZero())
+        {
+            notificationContext.AddNotification(
+                "Produto",
+                "Não foi possível criar o produto."
+            );
+            return new CreateResponse {Id = 0};
+        }
         
         var warehouses = await warehouseUseCase.ListAll();
         var stockBalances = warehouses.Select(w => 
             new StockBalance(product.Id, w.Id)
         );
+        
         await stockBalanceUseCase.AddRangeAsync(stockBalances);
-
         await unitOfWork.CommitAsync();
         
         return new CreateResponse {Id = product.Id};

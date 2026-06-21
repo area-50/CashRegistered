@@ -18,8 +18,8 @@ public class UniqueConstraintStrategy : IPersistenceExceptionStrategy
         
         return pgEx.ConstraintName switch
         {
-            "UX_Product_Sku" => new ErrorDetail("Sku", "Já existe um produto com este SKU."),
-            "UX_User_Email" => new ErrorDetail("Email", "Este e-mail já está em uso."),
+            "IX_Products_Sku" => new ErrorDetail("Sku", "Já existe um produto com este SKU."),
+            "IX_User_Email" => new ErrorDetail("Email", "Este e-mail já está em uso."),
             _ => new ErrorDetail("Database", "Este registro já existe no sistema.")
         };
     }

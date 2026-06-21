@@ -7,6 +7,7 @@ namespace Application.Inventory.Interfaces;
 
 public interface IWarehouseUseCase
 {
+    Task<IEnumerable<Warehouse>> ListAll();
     Task<CreateResponse> CreateWarehouse(CreateWarehouseRequest request);
     
     Task<PagedResponse<GetWarehouseByIdResponse>> SearchWarehouses(SearchWarehouseRequest request);

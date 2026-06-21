@@ -1,11 +1,8 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Application.Identity.Interfaces;
 using Application.Security.Interfaces;
-using Application.Financial.Interfaces;
 using Domain.Identity.Entities;
-using Domain.Financial.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
@@ -31,7 +28,8 @@ public class TokenService(IConfiguration config) : ITokenGenerator
             audience: config["Jwt:Audience"],
             claims: claims,
             expires: DateTime.Now.AddDays(30),
-            signingCredentials: credentials);
+            signingCredentials: credentials
+        );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }

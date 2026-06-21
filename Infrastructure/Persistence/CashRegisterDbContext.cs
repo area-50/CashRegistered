@@ -2,6 +2,7 @@ using Domain.Identity.Entities;
 using Domain.Financial.Entities;
 using Domain.Inventory.Entities;
 using Domain.Business.Entities;
+using Domain.Security.Entities;
 using Microsoft.EntityFrameworkCore;
 using Shared.Abstractions;
 using Flunt.Notifications;
@@ -13,6 +14,9 @@ public class CashRegisterDbContext(DbContextOptions<CashRegisterDbContext> optio
     // Identity
     public DbSet<User> Users { get; set; }
     public DbSet<Person> People { get; set; }
+
+    // Security
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     // Financial
     public DbSet<CashFlow> CashFlows { get; set; }

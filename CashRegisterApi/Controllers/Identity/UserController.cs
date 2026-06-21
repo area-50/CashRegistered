@@ -51,15 +51,32 @@ public class UserController(IUserUseCase user) : ControllerBase
     [Authorize]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
-        var userIdString = User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userIdString = User.FindFirstValue(JwtRegisteredClaimNames.Sub)
+                           ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
         
-        if (!int.TryParse(userIdString, out int userId))
-        {
-            return Unauthorized();
-        }
-
+        if (!int.TryParse(userIdString, out int userId)) return Unauthorized();
+        
         await user.ChangePassword(userId, request);
         return Ok();
+    }
+
+    [HttpGet("me")]
+    [Authorize]
+    public async Task<IActionResult> GetMe()
+    {
+        var userIdString = User.FindFirstValue(JwtRegisteredClaimNames.Sub)
+                           ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+        
+        if (!int.TryParse(userIdString, out int userId)) return Unauthorized();
+        
+        var response = await user.GetMe(userId);
+        
+        if (string.IsNullOrEmpty(response.UserName)) return NotFound();
+
+        return Ok(new Shared.Response.ApiResponse<object>
+        {
+            Data = response
+        });
     }
 }
 

@@ -208,6 +208,22 @@ public class UserUseCase(
         };
     }
 
+    public async Task<GetMeResponse> GetMe(int userId)
+    {
+        var user = await repository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            notificationContext.AddNotification("User", "O usuário não existe.");
+            return new GetMeResponse();
+        }
+
+        return new GetMeResponse
+        {
+            UserName = user.UserName,
+            Name = user.Person.Name
+        };
+    }
+
     public async Task<User?> GetUserByUserName(string userName)
     {
         return await repository.GetUserByUserName(userName);

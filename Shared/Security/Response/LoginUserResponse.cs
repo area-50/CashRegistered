@@ -5,6 +5,7 @@ namespace Shared.Security.Response;
 public class LoginUserResponse
 {
     public string AccessToken { get; set; } = string.Empty;
+    public string RefreshToken { get; set; } = string.Empty;
 
     public int Id { get; set; }
 

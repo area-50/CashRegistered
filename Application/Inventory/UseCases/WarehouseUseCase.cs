@@ -62,6 +62,11 @@ public class WarehouseUseCase(
         return await repository.GetByIdAsync(id);
     }
 
+    public async Task<IEnumerable<Warehouse>> ListAll()
+    {
+        return await repository.FindAsync(_ => true);
+    }
+
     public async Task<GetWarehouseByIdResponse> GetWarehouseById(int id)
     {
         var warehouse = await repository.GetByIdAsync(id);

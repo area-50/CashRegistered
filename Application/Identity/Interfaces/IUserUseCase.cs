@@ -18,4 +18,5 @@ public interface IUserUseCase
     Task<User?> GetUserByUserName(string userName);
     Task<User?> GetUserLoginByUserName(string userName);
     Task<PagedResponse<GetAllUsersResponse>> SearchUsers(SearchUserRequest request);
+    Task<GetMeResponse> GetMe(int userId);
 }

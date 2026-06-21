@@ -1,11 +1,15 @@
 using System.Reflection;
 using System.Text;
+using Application.Decorators;
+using Application.Services;
 using Domain.Identity.Enums;
 using FluentValidation;
+using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Shared.Abstractions;
 
 namespace Application.Services;
 
@@ -16,6 +20,13 @@ public static class ServiceExtensions
         IConfiguration configuration
     )
     {
+        services.AddScoped<IUnitOfWork>(provider =>
+        {
+            var dbContext = provider.GetRequiredService<CashRegisterDbContext>();
+            var exceptionHandler = provider.GetRequiredService<PersistenceExceptionHandler>();
+            return new UnitOfWorkDecorator(dbContext, exceptionHandler);
+        });
+
         services.AddAutoMapper(
             cfg => { }, Assembly.GetExecutingAssembly()
         );
@@ -40,11 +51,8 @@ public static class ServiceExtensions
                     {
                         var cookieToken = context.Request.Cookies["access_token"];
 
-                        if (!string.IsNullOrEmpty(cookieToken))
-                        {
-                            context.Token = cookieToken;
-                        }
-
+                        if (!string.IsNullOrEmpty(cookieToken)) context.Token = cookieToken;
+                        
                         return Task.CompletedTask;
                     }
                 };

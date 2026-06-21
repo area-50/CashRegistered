@@ -6,7 +6,6 @@ using Moq;
 using Shared.Abstractions;
 using Shared.Inventory.Request;
 using Shared.Notifications;
-using Xunit;
 
 namespace Tests.Application.Inventory.UseCases;
 

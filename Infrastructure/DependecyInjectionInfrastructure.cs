@@ -10,6 +10,7 @@ using Infrastructure.Identity.Repositories;
 using Infrastructure.Inventory.Repositories;
 using Infrastructure.Persistence;
 using Infrastructure.Security.Services;
+using Infrastructure.Security.Repositories;
 using Infrastructure.Utils;
 using Infrastructure.Utils.Interfaces;
 using Shared.Notifications;
@@ -37,6 +38,8 @@ public static class DependencyInjectionInfrastructure
 
         services.AddScoped<IPasswordHasher, Argon2Services>();
        
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+
         services.AddScoped<IUserRepository, UserRepository>();
         
         services.AddScoped<ICashFlowRepository, CashFlowRepository>();
@@ -56,6 +59,8 @@ public static class DependencyInjectionInfrastructure
         services.AddScoped<IProductRepository, ProductRepository>();
         
         services.AddScoped<IWarehouseRepository, WarehouseRepository>();
+        
+        services.AddScoped<IStockBalanceRepository, StockBalanceRepository>();
 
         return services;
     }
