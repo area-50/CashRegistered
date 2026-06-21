@@ -220,7 +220,8 @@ public class UserUseCase(
         return new GetMeResponse
         {
             UserName = user.UserName,
-            Name = user.Person.Name
+            Name = user.Person.Name,
+            Role = user.UserRole.ToString()
         };
     }
 

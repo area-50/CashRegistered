@@ -49,4 +49,29 @@ public class StockBalance : BaseEntity
             );
         AddNotifications(contract.Notifications);
     }
+
+    public void AddStock(decimal quantity)
+    {
+        if (quantity <= 0)
+        {
+            AddNotification("StockBalance", "A quantidade de adição deve ser maior que zero.");
+            return;
+        }
+        AvailableQuantity += quantity;
+    }
+
+    public void RemoveStock(decimal quantity)
+    {
+        if (quantity <= 0)
+        {
+            AddNotification("StockBalance", "A quantidade de baixa deve ser maior que zero.");
+            return;
+        }
+        if (AvailableQuantity < quantity)
+        {
+            AddNotification("StockBalance", "Saldo insuficiente neste almoxarifado para concluir a saída.");
+            return;
+        }
+        AvailableQuantity -= quantity;
+    }
 }

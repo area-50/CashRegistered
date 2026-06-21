@@ -43,6 +43,8 @@ public static class DependencyInjectionUseCases
         
         services.AddScoped<IStockBalanceUseCase, StockBalanceUseCase>();
         
+        services.AddScoped<IInventoryTransactionUseCase, InventoryTransactionUseCase>();
+        
         services.AddScoped<IPersistenceExceptionStrategy, UniqueConstraintStrategy>();
         
         services.AddScoped<IPersistenceExceptionStrategy, ForeignKeyViolationStrategy>();

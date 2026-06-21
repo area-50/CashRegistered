@@ -45,8 +45,8 @@ public class AuthAppService(
             {
                 AccessToken = tokenGenerator.GenerateToken(user),
                 RefreshToken = refreshToken.Token,
-                Id = user.Id,
-                UserName = user.Person.Name,
+                UserName = user.UserName,
+                Name = user.Person.Name,
                 Role = user.UserRole.ToString()
             };
         }
@@ -75,8 +75,8 @@ public class AuthAppService(
         {
             AccessToken = tokenGenerator.GenerateToken(existingToken.User),
             RefreshToken = newRefreshToken.Token,
-            Id = existingToken.User.Id,
-            UserName = existingToken.User.Person.Name,
+            UserName = existingToken.User.UserName,
+            Name = existingToken.User.Person.Name,
             Role = existingToken.User.UserRole.ToString()
         };
     }

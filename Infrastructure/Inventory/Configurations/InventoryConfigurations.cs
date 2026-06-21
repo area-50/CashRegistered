@@ -114,7 +114,7 @@ public class InventoryTransactionConfiguration : IEntityTypeConfiguration<Invent
     {
         builder.ToTable("InventoryTransactions");
         builder.HasKey(x => x.Id);
-        builder.Property(x => x.TransactionType).HasConversion<string>();
+        builder.Property(x => x.Type).HasConversion<string>();
         builder.Property(x => x.Status).HasConversion<string>();
         
         builder.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);

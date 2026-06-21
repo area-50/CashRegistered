@@ -33,7 +33,7 @@ public class AuthController(IAuthAppService authService) : ControllerBase
         
         return Ok(new Shared.Response.ApiResponse<object>
         {
-            Data = new { response.Id, response.UserName, response.Role }
+            Data = new { response.UserName, response.Name, response.Role }
         });
     }
     
@@ -83,7 +83,7 @@ public class AuthController(IAuthAppService authService) : ControllerBase
 
         return Ok(new Shared.Response.ApiResponse<object>
         {
-            Data = new { response.Id, response.UserName, response.Role }
+            Data = new { response.UserName, response.Name, response.Role }
         });
     }
     
