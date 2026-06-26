@@ -6,6 +6,7 @@ using Shared.Financial.Request;
 
 namespace CashRegister.Controllers.Financial;
 
+[Obsolete("Funcionalidade depreciada.")]
 [Route("api/[controller]")]
 [ApiController]
 public class CashFlowController(ICashFlowUseCase cashFlow) : ControllerBase

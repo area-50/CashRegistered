@@ -20,7 +20,19 @@ public class Warehouse : BaseEntity
     
     public string Type { get; private set; }
     
+    public bool IsPrincipal { get; private set; }
+    
     public ICollection<StockBalance> StockBalances { get; private set; } = new List<StockBalance>();
+
+    public void SetAsPrincipal()
+    {
+        IsPrincipal = true;
+    }
+
+    public void RemovePrincipal()
+    {
+        IsPrincipal = false;
+    }
 
     private void EntityValidate()
     {

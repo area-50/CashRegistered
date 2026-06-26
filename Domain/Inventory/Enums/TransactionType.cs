@@ -5,5 +5,7 @@ public enum TransactionType
     PurchaseEntry,
     Transfer,
     RequisitionExit,
-    Reversal
+    Reversal,
+    InventoryAdjustmentEntry,
+    InventoryAdjustmentExit
 }

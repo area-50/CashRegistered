@@ -10,15 +10,15 @@ using Shared.Response;
 namespace Application.Inventory.UseCases;
 
 public class InventoryTransactionUseCase(
+    IEnumerable<IInventoryTransactionStrategy> strategies,
     IInventoryTransactionRepository transactionRepository,
-    IStockBalanceRepository stockBalanceRepository,
     IUnitOfWork unitOfWork,
     NotificationContext notificationContext
 ) : IInventoryTransactionUseCase
 {
     public async Task<CreateResponse> CreateTransaction(CreateInventoryTransactionRequest request)
     {
-        if (request.Items == null || !request.Items.Any())
+        if (!request.Items.Any())
         {
             notificationContext.AddNotification("Transaction", "A transação deve conter ao menos um item.");
             return new CreateResponse { Id = 0 };
@@ -30,41 +30,22 @@ public class InventoryTransactionUseCase(
             return new CreateResponse { Id = 0 };
         }
 
-        var transaction = new InventoryTransaction(request.UserId, type, request.ReferenceDocument);
+        var transaction = new InventoryTransaction(
+            request.UserId, 
+            type, 
+            request.ReferenceDocument, 
+            request.Name, 
+            request.Description);
 
-        foreach (var itemReq in request.Items)
+        var strategy = strategies.FirstOrDefault(s => s.AppliesTo(type));
+        
+        if (strategy == null)
         {
-            var item = new InventoryTransactionItem(
-                0, itemReq.ProductId, itemReq.UomId, itemReq.TransactionQuantity, 
-                itemReq.BaseQuantity, itemReq.SourceWarehouseId, itemReq.DestinationWarehouseId);
-            
-            transaction.AddItem(item);
-
-            if (type == TransactionType.PurchaseEntry)
-            {
-                if (itemReq.DestinationWarehouseId == null)
-                {
-                    notificationContext.AddNotification("Warehouse", "Almoxarifado de destino é obrigatório para entrada.");
-                    continue;
-                }
-                var balance = await GetStockBalance(itemReq.ProductId, itemReq.DestinationWarehouseId.Value);
-                balance.AddStock(itemReq.BaseQuantity);
-                stockBalanceRepository.Update(balance);
-            }
-            else if (type == TransactionType.RequisitionExit)
-            {
-                if (itemReq.SourceWarehouseId == null)
-                {
-                    notificationContext.AddNotification("Warehouse", "Almoxarifado de origem é obrigatório para saída.");
-                    continue;
-                }
-                var balance = await GetStockBalance(itemReq.ProductId, itemReq.SourceWarehouseId.Value);
-                balance.RemoveStock(itemReq.BaseQuantity);
-                
-                if (balance.IsInvalid) notificationContext.AddNotifications(balance.Notifications);
-                else stockBalanceRepository.Update(balance);
-            }
+            notificationContext.AddNotification("Transaction", "Nenhuma estratégia encontrada para este tipo de transação.");
+            return new CreateResponse { Id = 0 };
         }
+
+        await strategy.ProcessTransactionAsync(transaction, request.Items);
 
         if (notificationContext.Notifications.Any() || transaction.IsInvalid)
             return new CreateResponse { Id = 0 };
@@ -75,17 +56,59 @@ public class InventoryTransactionUseCase(
         return new CreateResponse { Id = transaction.Id };
     }
 
-    private async Task<StockBalance> GetStockBalance(int productId, int warehouseId)
+    public async Task<PagedResponse<Shared.Inventory.Response.GetSearchInventoryTransactionResponse>> SearchAsync(SearchInventoryTransactionRequest request)
     {
-        var balances = await stockBalanceRepository.FindAsync(x => x.ProductId == productId && x.WarehouseId == warehouseId);
-        var balance = balances.FirstOrDefault();
+        var pagedTransactions = await transactionRepository.SearchAsync(request);
 
-        if (balance == null)
+        var responseItems = pagedTransactions.Items.Select(x => new Shared.Inventory.Response.GetSearchInventoryTransactionResponse
         {
-            notificationContext.AddNotification("StockBalance", "Saldo não encontrado para o produto e almoxarifado.");
-            return new StockBalance(productId, warehouseId); 
+            Id = x.Id,
+            TransactionType = x.Type.ToString(),
+            ReferenceDocument = x.ReferenceDocument,
+            Name = x.Name,
+            Description = x.Description,
+            CreatedAt = x.DateTime,
+            IsActive = true // Mandatório
+        }).ToList();
+
+        return new PagedResponse<Shared.Inventory.Response.GetSearchInventoryTransactionResponse>
+        {
+            Items = responseItems,
+            TotalCount = pagedTransactions.TotalCount,
+            Page = pagedTransactions.Page,
+            PageSize = pagedTransactions.PageSize
+        };
+    }
+
+    public async Task<Shared.Inventory.Response.GetInventoryTransactionByIdResponse?> GetByIdAsync(int id)
+    {
+        var transaction = await transactionRepository.GetByIdAsync(id);
+
+        if (transaction == null)
+        {
+            return null;
         }
 
-        return balance;
+        return new Shared.Inventory.Response.GetInventoryTransactionByIdResponse
+        {
+            Id = transaction.Id,
+            TransactionType = transaction.Type.ToString(),
+            ReferenceDocument = transaction.ReferenceDocument,
+            Name = transaction.Name,
+            Description = transaction.Description,
+            CreatedAt = transaction.DateTime,
+            IsActive = true, // Mandatório
+            Items = transaction.Items.Select(i => new Shared.Inventory.Response.InventoryTransactionItemResponse
+            {
+                Id = i.Id,
+                ProductId = i.ProductId,
+                ProductName = i.Product.Name,
+                Quantity = i.TransactionQuantity,
+                SourceWarehouseId = i.SourceWarehouseId,
+                SourceWarehouseName = i.SourceWarehouse?.Name,
+                DestinationWarehouseId = i.DestinationWarehouseId,
+                DestinationWarehouseName = i.DestinationWarehouse?.Name
+            }).ToList()
+        };
     }
 }

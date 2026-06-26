@@ -3,6 +3,9 @@ using Domain.Inventory.Entities;
 using Domain.Inventory.Repositories;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Shared.Response;
+using Shared.Inventory.Request;
+using Infrastructure.Common;
 
 namespace Infrastructure.Inventory.Repositories;
 
@@ -17,6 +20,11 @@ public class InventoryTransactionRepository(CashRegisterDbContext context) : IIn
     {
         return await context.InventoryTransactions
             .Include(x => x.Items)
+                .ThenInclude(i => i.Product)
+            .Include(x => x.Items)
+                .ThenInclude(i => i.SourceWarehouse)
+            .Include(x => x.Items)
+                .ThenInclude(i => i.DestinationWarehouse)
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
@@ -36,5 +44,20 @@ public class InventoryTransactionRepository(CashRegisterDbContext context) : IIn
     public void Delete(InventoryTransaction entity)
     {
         context.InventoryTransactions.Remove(entity);
+    }
+
+    public async Task<PagedResponse<InventoryTransaction>> SearchAsync(SearchInventoryTransactionRequest request)
+    {
+        var query = context.InventoryTransactions.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(request.ReferenceDocument))
+        {
+            var term = request.ReferenceDocument.ToLower();
+            query = query.Where(x => x.ReferenceDocument != null && x.ReferenceDocument.ToLower().Contains(term));
+        }
+
+        return await query
+            .OrderByDescending(x => x.DateTime)
+            .ToPagedResponseAsync(request.Page, request.PageSize);
     }
 }

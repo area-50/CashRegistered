@@ -116,6 +116,8 @@ public class InventoryTransactionConfiguration : IEntityTypeConfiguration<Invent
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Type).HasConversion<string>();
         builder.Property(x => x.Status).HasConversion<string>();
+        builder.Property(x => x.Name).HasMaxLength(100).IsRequired(false);
+        builder.Property(x => x.Description).HasMaxLength(500).IsRequired(false);
         
         builder.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
     }

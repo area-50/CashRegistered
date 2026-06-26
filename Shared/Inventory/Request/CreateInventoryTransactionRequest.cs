@@ -5,6 +5,8 @@ public class CreateInventoryTransactionRequest
     public int UserId { get; set; }
     public string TransactionType { get; set; } = string.Empty;
     public string? ReferenceDocument { get; set; }
+    public string? Name { get; set; }
+    public string? Description { get; set; }
     public List<CreateInventoryTransactionItemRequest> Items { get; set; } = [];
 }
 

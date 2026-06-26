@@ -16,6 +16,23 @@ public class WarehouseUseCase(
     IUnitOfWork unitOfWork
 ) : IWarehouseUseCase
 {
+    private async Task HandlePrincipalLogicAsync(bool isPrincipalRequest, int? currentWarehouseId = null)
+    {
+        if (isPrincipalRequest)
+        {
+            var principalWarehouses = await repository.FindAsync(w => w.IsPrincipal);
+            
+            foreach (var warehouse in principalWarehouses)
+            {
+                if (currentWarehouseId.HasValue && warehouse.Id == currentWarehouseId.Value)
+                    continue;
+                    
+                warehouse.RemovePrincipal();
+                repository.Update(warehouse);
+            }
+        }
+    }
+
     public async Task<CreateResponse> CreateWarehouse(CreateWarehouseRequest request)
     {
         
@@ -24,11 +41,18 @@ public class WarehouseUseCase(
             request.Type
         );
 
+        if (request.IsPrincipal)
+            warehouse.SetAsPrincipal();
+        else
+            warehouse.RemovePrincipal();
+
         if (warehouse.IsInvalid)
         {
             notificationContext.AddNotifications(warehouse.Notifications);
             return new CreateResponse { Id = 0 };
         }
+        
+        await HandlePrincipalLogicAsync(request.IsPrincipal);
         
         await repository.CreateAsync(warehouse);
         await unitOfWork.CommitAsync();
@@ -48,7 +72,8 @@ public class WarehouseUseCase(
                 Id = w.Id,
                 Name = w.Name,
                 Type = w.Type,
-                IsActive = w.IsActive
+                IsActive = w.IsActive,
+                IsPrincipal = w.IsPrincipal
             }
             ),
             Page = pagedWarehouses.Page,
@@ -78,7 +103,8 @@ public class WarehouseUseCase(
             Id = warehouse!.Id,
             Name = warehouse.Name,
             Type = warehouse.Type,
-            IsActive = warehouse.IsActive
+            IsActive = warehouse.IsActive,
+            IsPrincipal = warehouse.IsPrincipal
         };
     }
 
@@ -94,11 +120,18 @@ public class WarehouseUseCase(
             request.IsActive
         );
         
+        if (request.IsPrincipal)
+            warehouse.SetAsPrincipal();
+        else
+            warehouse.RemovePrincipal();
+        
         if (warehouse.IsInvalid)
         {
             notificationContext.AddNotifications(warehouse.Notifications);
             return new UpdateResponse { Id = 0 };
         }
+        
+        await HandlePrincipalLogicAsync(request.IsPrincipal, warehouse.Id);
         
         repository.Update(warehouse);
         await unitOfWork.CommitAsync();

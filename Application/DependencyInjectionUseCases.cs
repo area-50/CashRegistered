@@ -9,6 +9,7 @@ using Application.Inventory.UseCases;
 using Application.Interfaces;
 using Application.Services;
 using Application.Services.Strategies;
+using Application.Inventory.UseCases.Strategies;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application;
@@ -42,6 +43,11 @@ public static class DependencyInjectionUseCases
         services.AddScoped<IWarehouseUseCase, WarehouseUseCase>();
         
         services.AddScoped<IStockBalanceUseCase, StockBalanceUseCase>();
+        
+        // Estratégias de Movimentação de Estoque
+        services.AddScoped<IInventoryTransactionStrategy, EntryTransactionStrategy>();
+        services.AddScoped<IInventoryTransactionStrategy, ExitTransactionStrategy>();
+        services.AddScoped<IInventoryTransactionStrategy, TransferTransactionStrategy>();
         
         services.AddScoped<IInventoryTransactionUseCase, InventoryTransactionUseCase>();
         

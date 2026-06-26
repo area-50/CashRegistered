@@ -43,12 +43,16 @@ public class WarehouseRepository(CashRegisterDbContext context, ISqlUtils sqlUti
         var query = context.Warehouses.AsNoTracking();
         
         if (string.IsNullOrWhiteSpace(request.Term))
-            return await query.ToPagedResponseAsync(request.Page, request.PageSize);
+            return await query
+                .OrderByDescending(w => w.IsPrincipal)
+                .ToPagedResponseAsync(request.Page, request.PageSize);
 
         var term = sqlUtils.SqlLikeContains(request.Term);
 
         query = query.Where(w => EF.Functions.ILike(w.Name, term));
     
-        return await query.ToPagedResponseAsync(request.Page, request.PageSize);
+        return await query
+            .OrderByDescending(w => w.IsPrincipal)
+            .ToPagedResponseAsync(request.Page, request.PageSize);
     }
 }
