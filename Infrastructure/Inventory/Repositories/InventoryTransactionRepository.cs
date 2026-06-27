@@ -56,6 +56,16 @@ public class InventoryTransactionRepository(CashRegisterDbContext context) : IIn
             query = query.Where(x => x.ReferenceDocument != null && x.ReferenceDocument.ToLower().Contains(term));
         }
 
+        if (request.StartDate.HasValue)
+        {
+            query = query.Where(x => x.DateTime >= request.StartDate.Value.ToUniversalTime());
+        }
+
+        if (request.EndDate.HasValue)
+        {
+            query = query.Where(x => x.DateTime <= request.EndDate.Value.ToUniversalTime());
+        }
+
         return await query
             .OrderByDescending(x => x.DateTime)
             .ToPagedResponseAsync(request.Page, request.PageSize);
