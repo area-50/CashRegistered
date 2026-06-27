@@ -67,7 +67,7 @@ public class InventoryTransactionUseCase(
             ReferenceDocument = x.ReferenceDocument,
             Name = x.Name,
             Description = x.Description,
-            CreatedAt = x.DateTime,
+            TransactionDate = x.DateTime,
             IsActive = true // Mandatório
         }).ToList();
 
