@@ -46,7 +46,9 @@ public static class DependencyInjectionUseCases
         
         // Estratégias de Movimentação de Estoque
         services.AddScoped<IInventoryTransactionStrategy, EntryTransactionStrategy>();
+        
         services.AddScoped<IInventoryTransactionStrategy, ExitTransactionStrategy>();
+        
         services.AddScoped<IInventoryTransactionStrategy, TransferTransactionStrategy>();
         
         services.AddScoped<IInventoryTransactionUseCase, InventoryTransactionUseCase>();
@@ -58,5 +60,7 @@ public static class DependencyInjectionUseCases
         services.AddScoped<IPersistenceExceptionStrategy, InfrastructureFailureStrategy>();
         
         services.AddScoped<PersistenceExceptionHandler>();
+        
+        services.AddScoped<IInventoryRequisitionUseCase, InventoryRequisitionUseCase>();
     }
 }
