@@ -63,6 +63,8 @@ public static class DependencyInjectionInfrastructure
         services.AddScoped<IStockBalanceRepository, StockBalanceRepository>();
         
         services.AddScoped<IInventoryTransactionRepository, InventoryTransactionRepository>();
+        
+        services.AddScoped<IInventoryRequisitionRepository, InventoryRequisitionRepository>();
 
         return services;
     }

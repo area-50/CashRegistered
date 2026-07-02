@@ -239,3 +239,33 @@ public class InternalRequisitionItemConfiguration : IEntityTypeConfiguration<Int
         builder.HasOne(x => x.Uom).WithMany().HasForeignKey(x => x.UomId);
     }
 }
+
+public class InventoryRequisitionConfiguration : IEntityTypeConfiguration<InventoryRequisition>
+{
+    public void Configure(EntityTypeBuilder<InventoryRequisition> builder)
+    {
+        builder.ToTable("InventoryRequisitions");
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.OriginModule).IsRequired().HasMaxLength(50);
+        builder.Property(x => x.Status).HasConversion<string>();
+        builder.Property(x => x.Notes).HasMaxLength(500).IsRequired(false);
+    }
+}
+
+public class InventoryRequisitionItemConfiguration : IEntityTypeConfiguration<InventoryRequisitionItem>
+{
+    public void Configure(EntityTypeBuilder<InventoryRequisitionItem> builder)
+    {
+        builder.ToTable("InventoryRequisitionItems");
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.Quantity).HasPrecision(18, 4);
+
+        builder.HasOne(x => x.Requisition)
+            .WithMany(x => x.Items)
+            .HasForeignKey(x => x.InventoryRequisitionId);
+
+        builder.HasOne(x => x.Product)
+            .WithMany()
+            .HasForeignKey(x => x.ProductId);
+    }
+}

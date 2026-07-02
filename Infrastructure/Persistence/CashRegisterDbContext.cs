@@ -34,6 +34,8 @@ public class CashRegisterDbContext(DbContextOptions<CashRegisterDbContext> optio
     public DbSet<StockBalance> StockBalances { get; set; }
     public DbSet<InventoryTransaction> InventoryTransactions { get; set; }
     public DbSet<InventoryTransactionItem> InventoryTransactionItems { get; set; }
+    public DbSet<InventoryRequisition> InventoryRequisitions { get; set; }
+    public DbSet<InventoryRequisitionItem> InventoryRequisitionItems { get; set; }
 
     // Inventory - Suprimentos e Compras
     public DbSet<Supplier> Suppliers { get; set; }
