@@ -41,7 +41,9 @@ public class InventoryTransactionUseCase(
         
         if (strategy == null)
         {
-            notificationContext.AddNotification("Transaction", "Nenhuma estratégia encontrada para este tipo de transação.");
+            notificationContext.AddNotification(
+                "Transaction", "Nenhuma estratégia encontrada para este tipo de transação."
+            );
             return new CreateResponse { Id = 0 };
         }
 

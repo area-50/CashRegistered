@@ -41,14 +41,16 @@ public class AuthController(IAuthAppService authService) : ControllerBase
     [AllowAnonymous] 
     public IActionResult Logout()
     {
-        Response.Cookies.Delete("access_token", new CookieOptions
+        var cookieOptions = new CookieOptions
         {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.None,
             Path = "/"
-        });
-        Response.Cookies.Delete("refresh_token", new CookieOptions
-        {
-            Path = "/"
-        });
+        };
+
+        Response.Cookies.Delete("access_token", cookieOptions);
+        Response.Cookies.Delete("refresh_token", cookieOptions);
 
         return Ok(new { message = "Sessão encerrada com sucesso." });
     }

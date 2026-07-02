@@ -7,4 +7,6 @@ public class SearchInventoryTransactionRequest : PagedRequest
     public string? ReferenceDocument { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
+    public string? TransactionType { get; set; }
+    public bool? IsActive { get; set; }
 }

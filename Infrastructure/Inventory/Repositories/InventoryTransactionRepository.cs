@@ -66,6 +66,19 @@ public class InventoryTransactionRepository(CashRegisterDbContext context) : IIn
             query = query.Where(x => x.DateTime <= request.EndDate.Value.ToUniversalTime());
         }
 
+        if (!string.IsNullOrWhiteSpace(request.TransactionType) &&
+            Enum.TryParse<Domain.Inventory.Enums.TransactionType>(
+                request.TransactionType, true, out var type
+            ))
+        {
+            query = query.Where(x => x.Type == type);
+        }
+
+        if (request.IsActive.HasValue)
+        {
+            query = query.Where(x => x.IsActive == request.IsActive.Value);
+        }
+
         return await query
             .OrderByDescending(x => x.DateTime)
             .ToPagedResponseAsync(request.Page, request.PageSize);

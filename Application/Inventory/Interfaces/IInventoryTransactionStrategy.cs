@@ -7,5 +7,6 @@ namespace Application.Inventory.Interfaces;
 public interface IInventoryTransactionStrategy
 {
     bool AppliesTo(TransactionType type);
+    
     Task ProcessTransactionAsync(InventoryTransaction transaction, IEnumerable<CreateInventoryTransactionItemRequest> items);
 }

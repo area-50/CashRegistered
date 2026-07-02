@@ -7,10 +7,10 @@ namespace CashRegisterApi.Controllers.Inventory;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
 public class StockBalanceController(IStockBalanceUseCase useCase) : ControllerBase
 {
     [HttpGet("Search")]
+    [Authorize(Policy = "LogisticsOnly")]
     public async Task<IActionResult> Search([FromQuery] SearchStockBalanceRequest request)
     {
         var response = await useCase.SearchAsync(request);
@@ -18,6 +18,7 @@ public class StockBalanceController(IStockBalanceUseCase useCase) : ControllerBa
     }
 
     [HttpGet("GetAvailableBalance")]
+    [Authorize(Policy = "LogisticsOnly")]
     public async Task<IActionResult> GetAvailableBalance([FromQuery] int productId, [FromQuery] int? warehouseId)
     {
         var balance = await useCase.GetAvailableBalanceAsync(productId, warehouseId);

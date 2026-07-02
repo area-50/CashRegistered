@@ -1,14 +1,12 @@
 using System.Linq.Expressions;
 using Application.Inventory.UseCases;
 using Domain.Inventory.Entities;
-using Domain.Inventory.Enums;
 using Domain.Inventory.Repositories;
 using FluentAssertions;
 using Moq;
 using Shared.Abstractions;
 using Shared.Inventory.Request;
 using Shared.Notifications;
-using Xunit;
 
 namespace Tests.Application.Inventory.UseCases;
 
@@ -28,8 +26,8 @@ public class InventoryTransactionUseCaseTests
         _notificationContext = new NotificationContext();
         
         _useCase = new InventoryTransactionUseCase(
+            new List<global::Application.Inventory.Interfaces.IInventoryTransactionStrategy>(),
             _transactionRepoMock.Object,
-            _stockBalanceRepoMock.Object,
             _uowMock.Object,
             _notificationContext
         );
@@ -52,7 +50,7 @@ public class InventoryTransactionUseCaseTests
     }
 
     [Fact]
-    public async Task CreateTransaction_ShouldUpdateStock_WhenPurchaseEntry()
+    public async Task CreateTransaction_ShouldCallStrategy_WhenStrategyExists()
     {
         var request = new CreateInventoryTransactionRequest
         {
@@ -64,13 +62,21 @@ public class InventoryTransactionUseCaseTests
             }
         };
 
-        var balance = new StockBalance(1, 2, 5, 0);
-        _stockBalanceRepoMock.Setup(x => x.FindAsync(It.IsAny<Expression<Func<StockBalance, bool>>>()))
-            .ReturnsAsync(new List<StockBalance> { balance });
+        var strategyMock = new Mock<global::Application.Inventory.Interfaces.IInventoryTransactionStrategy>();
+        strategyMock.Setup(s => s.AppliesTo(global::Domain.Inventory.Enums.TransactionType.PurchaseEntry)).Returns(true);
+        strategyMock.Setup(s => s.ProcessTransactionAsync(It.IsAny<InventoryTransaction>(), It.IsAny<IEnumerable<CreateInventoryTransactionItemRequest>>()))
+            .Returns(Task.CompletedTask);
 
-        var response = await _useCase.CreateTransaction(request);
+        var useCase = new InventoryTransactionUseCase(
+            new List<global::Application.Inventory.Interfaces.IInventoryTransactionStrategy> { strategyMock.Object },
+            _transactionRepoMock.Object,
+            _uowMock.Object,
+            _notificationContext
+        );
 
-        _stockBalanceRepoMock.Verify(x => x.Update(It.Is<StockBalance>(b => b.AvailableQuantity == 15)), Times.Once);
+        var response = await useCase.CreateTransaction(request);
+
+        strategyMock.Verify(x => x.ProcessTransactionAsync(It.IsAny<InventoryTransaction>(), request.Items), Times.Once);
         _transactionRepoMock.Verify(x => x.CreateAsync(It.IsAny<InventoryTransaction>()), Times.Once);
         _uowMock.Verify(x => x.CommitAsync(), Times.Once);
     }

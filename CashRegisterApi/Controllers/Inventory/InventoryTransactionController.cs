@@ -12,6 +12,7 @@ namespace CashRegister.Controllers.Inventory;
 public class InventoryTransactionController(IInventoryTransactionUseCase inventoryTransactionUseCase) : ControllerBase
 {
     [HttpPost]
+    [Authorize(Policy = "LogisticsOnly")]
     public async Task<IActionResult> Create([FromBody] CreateInventoryTransactionRequest request)
     {
         var userIdString = User.FindFirstValue(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)
@@ -35,6 +36,7 @@ public class InventoryTransactionController(IInventoryTransactionUseCase invento
     }
 
     [HttpGet("Search")]
+    [Authorize(Policy = "LogisticsOnly")]
     public async Task<IActionResult> Search([FromQuery] SearchInventoryTransactionRequest request)
     {
         var response = await inventoryTransactionUseCase.SearchAsync(request);
@@ -42,6 +44,7 @@ public class InventoryTransactionController(IInventoryTransactionUseCase invento
     }
 
     [HttpGet("{id}")]
+    [Authorize(Policy = "LogisticsOnly")]
     public async Task<IActionResult> GetById(int id)
     {
         var response = await inventoryTransactionUseCase.GetByIdAsync(id);
