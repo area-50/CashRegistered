@@ -15,7 +15,7 @@ public class UnitOfMeasureRepository(CashRegisterDbContext context, ISqlUtils sq
     public async Task<PagedResponse<UnitOfMeasure>> SearchAsync(SearchUnitOfMeasureRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Term))
-            return await context.UnitsOfMeasure.ToPagedResponseAsync(request.Page, request.PageSize);
+            return await context.UnitsOfMeasure.OrderByDescending(u => u.Id).ToPagedResponseAsync(request.Page, request.PageSize);
         
         var term = sqlUtils.SqlLikeContains(request.Term.ToLower());
 
@@ -24,6 +24,7 @@ public class UnitOfMeasureRepository(CashRegisterDbContext context, ISqlUtils sq
                 EF.Functions.ILike(u.Name, term) ||
                 EF.Functions.ILike(u.Code, term)
             )
+            .OrderByDescending(u => u.Id)
             .ToPagedResponseAsync(request.Page, request.PageSize);
     }
 

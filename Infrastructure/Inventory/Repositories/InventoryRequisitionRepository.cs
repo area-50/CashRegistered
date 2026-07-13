@@ -1,6 +1,7 @@
 using Domain.Inventory.Entities;
 using Domain.Inventory.Repositories;
 using Infrastructure.Persistence;
+using Infrastructure.Common;
 using Shared.Inventory.Request;
 using Shared.Inventory.Response;
 using Shared.Response;
@@ -46,10 +47,12 @@ public class InventoryRequisitionRepository(CashRegisterDbContext context) : IIn
         if (!string.IsNullOrWhiteSpace(request.OriginModule))
             query = query.Where(x => x.OriginModule == request.OriginModule);
 
-        if (request.Status.HasValue)
+        if (!string.IsNullOrWhiteSpace(request.Status))
         {
-            var statusEnum = (Domain.Inventory.Enums.RequisitionStatus)request.Status.Value;
-            query = query.Where(x => x.Status == statusEnum);
+            if (Enum.TryParse<Domain.Inventory.Enums.RequisitionStatus>(request.Status, true, out var statusEnum))
+            {
+                query = query.Where(x => x.Status == statusEnum);
+            }
         }
 
         if (request.StartDate.HasValue)
@@ -58,13 +61,12 @@ public class InventoryRequisitionRepository(CashRegisterDbContext context) : IIn
         if (request.EndDate.HasValue)
             query = query.Where(x => x.CreatedAt <= request.EndDate.Value);
 
-        var totalRecords = await query.CountAsync();
-
-        var dbItems = await query
+        var pagedRequisitions = await query
             .OrderByDescending(x => x.CreatedAt)
-            .Skip((request.Page - 1) * request.PageSize)
-            .Take(request.PageSize)
-            .ToListAsync();
+            .ThenByDescending(x => x.Id)
+            .ToPagedResponseAsync(request.Page, request.PageSize);
+
+        var dbItems = pagedRequisitions.Items;
 
         var userIds = dbItems.Select(x => x.RequestedByUserId).Distinct().ToList();
         var usersDict = await context.Users
@@ -77,8 +79,7 @@ public class InventoryRequisitionRepository(CashRegisterDbContext context) : IIn
             OriginModule = x.OriginModule,
             RequestedByUserId = x.RequestedByUserId,
             RequestedByUserName = usersDict.GetValueOrDefault(x.RequestedByUserId) ?? "Sistema",
-            Status = (int)x.Status,
-            StatusDescription = x.Status.ToString(),
+            Status = x.Status.ToString(),
             CreatedAt = x.CreatedAt,
             FulfilledAt = x.FulfilledAt,
             IsActive = true
@@ -87,9 +88,9 @@ public class InventoryRequisitionRepository(CashRegisterDbContext context) : IIn
         return new PagedResponse<SearchInventoryRequisitionResponse>
         {
             Items = items,
-            Page = request.Page,
-            PageSize = request.PageSize,
-            TotalCount = totalRecords
+            Page = pagedRequisitions.Page,
+            PageSize = pagedRequisitions.PageSize,
+            TotalCount = pagedRequisitions.TotalCount
         };
     }
 
@@ -112,8 +113,7 @@ public class InventoryRequisitionRepository(CashRegisterDbContext context) : IIn
             OriginModule = req.OriginModule,
             RequestedByUserId = req.RequestedByUserId,
             RequestedByUserName = userName,
-            Status = (int)req.Status,
-            StatusDescription = req.Status.ToString(),
+            Status = req.Status.ToString(),
             CreatedAt = req.CreatedAt,
             FulfilledAt = req.FulfilledAt,
             Notes = req.Notes,
@@ -125,5 +125,10 @@ public class InventoryRequisitionRepository(CashRegisterDbContext context) : IIn
                 Quantity = i.Quantity
             }).ToList()
         };
+    }
+
+    public async Task<int> GetPendingCountAsync()
+    {
+        return await context.InventoryRequisitions.CountAsync(x => x.Status == Domain.Inventory.Enums.RequisitionStatus.Pending);
     }
 }

@@ -55,7 +55,8 @@ public class UomConversionRepository(
             .AsQueryable();
 
         if (string.IsNullOrWhiteSpace(request.Term))
-            return await query.ToPagedResponseAsync(request.Page, request.PageSize);
+            return await query.OrderByDescending(u => u.Id)
+                .ToPagedResponseAsync(request.Page, request.PageSize);
         
         var term = sqlUtils.SqlLikeContains(request.Term.ToLower());
         
@@ -72,6 +73,6 @@ public class UomConversionRepository(
             EF.Functions.ILike(uom.Product.Sku, term)
         );
 
-        return await query.ToPagedResponseAsync(request.Page, request.PageSize);
+        return await query.OrderByDescending(u => u.Id).ToPagedResponseAsync(request.Page, request.PageSize);
     }
 }

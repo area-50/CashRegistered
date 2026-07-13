@@ -6,7 +6,7 @@ public class SearchInventoryRequisitionRequest : PagedRequest
 {
     public string? OriginModule { get; set; }
     
-    public int? Status { get; set; } // 1=Pending, 2=Fulfilled, 3=Canceled
+    public string? Status { get; set; }
     
     public DateTime? StartDate { get; set; }
     

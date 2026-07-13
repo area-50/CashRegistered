@@ -6,8 +6,7 @@ public class GetInventoryRequisitionByIdResponse
     public string OriginModule { get; set; } = string.Empty;
     public int RequestedByUserId { get; set; }
     public string RequestedByUserName { get; set; } = string.Empty;
-    public int Status { get; set; }
-    public string StatusDescription { get; set; } = string.Empty;
+    public string Status { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime? FulfilledAt { get; set; }
     public string? Notes { get; set; }

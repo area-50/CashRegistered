@@ -11,4 +11,5 @@ public interface IInventoryRequisitionRepository : IRepository<InventoryRequisit
 {
     Task<PagedResponse<SearchInventoryRequisitionResponse>> SearchAsync(SearchInventoryRequisitionRequest request);
     Task<GetInventoryRequisitionByIdResponse?> GetByIdResponseAsync(int id);
+    Task<int> GetPendingCountAsync();
 }

@@ -62,5 +62,9 @@ public static class DependencyInjectionUseCases
         services.AddScoped<PersistenceExceptionHandler>();
         
         services.AddScoped<IInventoryRequisitionUseCase, InventoryRequisitionUseCase>();
+        
+        services.AddMediatR(
+            cfg => cfg.RegisterServicesFromAssembly(typeof(DependencyInjectionUseCases).Assembly)
+        );
     }
 }

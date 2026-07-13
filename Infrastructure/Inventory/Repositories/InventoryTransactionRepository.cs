@@ -81,6 +81,7 @@ public class InventoryTransactionRepository(CashRegisterDbContext context) : IIn
 
         return await query
             .OrderByDescending(x => x.DateTime)
+            .ThenByDescending(x => x.Id)
             .ToPagedResponseAsync(request.Page, request.PageSize);
     }
 }

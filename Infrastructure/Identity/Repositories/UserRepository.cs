@@ -56,6 +56,7 @@ public class UserRepository(CashRegisterDbContext context) : IUserRepository
                         u.Person.TaxId.Contains(request.TaxId))
             .Where(u => !request.BirthDate.HasValue || 
                         u.Person.Birthdate.Date == request.BirthDate.Value.Date)
+            .OrderByDescending(u => u.Id)
             .ToPagedResponseAsync(request.Page, request.PageSize);
     }
 }

@@ -48,7 +48,7 @@ public class CategoryRepository(CashRegisterDbContext context, ISqlUtils sqlUtil
             .AsQueryable();
         
         if (string.IsNullOrWhiteSpace(request.Term))
-            return await query.ToPagedResponseAsync(request.Page, request.PageSize);
+            return await query.OrderByDescending(c => c.Id).ToPagedResponseAsync(request.Page, request.PageSize);
 
         var term = sqlUtils.SqlLikeContains(request.Term.ToLower());
 
@@ -58,6 +58,6 @@ public class CategoryRepository(CashRegisterDbContext context, ISqlUtils sqlUtil
              EF.Functions.ILike(c.ParentCategory.Name, term))
         );
         
-        return await query.ToPagedResponseAsync(request.Page, request.PageSize);
+        return await query.OrderByDescending(c => c.Id).ToPagedResponseAsync(request.Page, request.PageSize);
     }
 }

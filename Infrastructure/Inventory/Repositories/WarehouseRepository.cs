@@ -45,6 +45,7 @@ public class WarehouseRepository(CashRegisterDbContext context, ISqlUtils sqlUti
         if (string.IsNullOrWhiteSpace(request.Term))
             return await query
                 .OrderByDescending(w => w.IsPrincipal)
+                .ThenByDescending(w => w.Id)
                 .ToPagedResponseAsync(request.Page, request.PageSize);
 
         var term = sqlUtils.SqlLikeContains(request.Term);
@@ -53,6 +54,7 @@ public class WarehouseRepository(CashRegisterDbContext context, ISqlUtils sqlUti
     
         return await query
             .OrderByDescending(w => w.IsPrincipal)
+            .ThenByDescending(w => w.Id)
             .ToPagedResponseAsync(request.Page, request.PageSize);
     }
 }

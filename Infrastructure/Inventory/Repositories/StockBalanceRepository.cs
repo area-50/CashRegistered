@@ -76,6 +76,7 @@ public class StockBalanceRepository(CashRegisterDbContext context) : IStockBalan
 
         return await query
             .OrderBy(x => x.Product.Name)
+            .ThenByDescending(x => x.Id)
             .Select(x => new GetSearchStockBalanceResponse
             {
                 Id = x.Id,

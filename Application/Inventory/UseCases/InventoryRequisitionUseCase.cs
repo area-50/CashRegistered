@@ -13,12 +13,13 @@ public class InventoryRequisitionUseCase(
     IInventoryRequisitionRepository repository,
     IInventoryTransactionUseCase transactionUseCase,
     IUnitOfWork unitOfWork,
-    NotificationContext notificationContext
+    NotificationContext notificationContext,
+    MediatR.IMediator mediator
 ) : IInventoryRequisitionUseCase
 {
     public async Task<CreateResponse> CreateRequisitionAsync(CreateInventoryRequisitionRequest request)
     {
-        if (request.Items == null || !request.Items.Any())
+        if (!request.Items.Any())
         {
             notificationContext.AddNotification("Items", "A requisição deve conter ao menos um item.");
             return new CreateResponse { Id = 0 };
@@ -37,10 +38,17 @@ public class InventoryRequisitionUseCase(
         await repository.CreateAsync(requisition);
         await unitOfWork.CommitAsync();
 
+        await mediator.Publish(new Domain.Inventory.Events.RequisitionStatusChangedEvent(
+            requisition.Id, 
+            requisition.Status.ToString()
+        ));
+
         return new CreateResponse { Id = requisition.Id };
     }
 
-    public async Task<UpdateResponse> FulfillRequisitionAsync(int requisitionId, int fulfilledByUserId, FulfillInventoryRequisitionRequest request)
+    public async Task<UpdateResponse> FulfillRequisitionAsync(
+        int requisitionId, int fulfilledByUserId, FulfillInventoryRequisitionRequest request
+    )
     {
         var requisition = await repository.GetByIdAsync(requisitionId);
         if (requisition == null)
@@ -48,14 +56,12 @@ public class InventoryRequisitionUseCase(
             notificationContext.AddNotification("Requisition", "Requisição não encontrada.");
             return new UpdateResponse { Id = 0 };
         }
-
-        // Action on Domain
+        
         requisition.Fulfill();
 
         if (requisition.IsInvalid || notificationContext.Notifications.Any())
             return new UpdateResponse { Id = 0 };
 
-        // Cross-domain call (using use case, NOT cross-repository)
         var transactionRequest = new CreateInventoryTransactionRequest
         {
             UserId = fulfilledByUserId,
@@ -77,12 +83,16 @@ public class InventoryRequisitionUseCase(
 
         if (transactionResponse.Id == 0)
         {
-            // The transaction use case failed, it already added notifications.
             return new UpdateResponse { Id = 0 };
         }
 
         repository.Update(requisition);
         await unitOfWork.CommitAsync();
+
+        await mediator.Publish(new Domain.Inventory.Events.RequisitionStatusChangedEvent(
+            requisition.Id, 
+            requisition.Status.ToString()
+        ));
 
         return new UpdateResponse { Id = requisition.Id };
     }
@@ -104,6 +114,11 @@ public class InventoryRequisitionUseCase(
         repository.Update(requisition);
         await unitOfWork.CommitAsync();
 
+        await mediator.Publish(new Domain.Inventory.Events.RequisitionStatusChangedEvent(
+            requisition.Id, 
+            requisition.Status.ToString()
+        ));
+
         return new UpdateResponse { Id = requisition.Id };
     }
 
@@ -115,5 +130,10 @@ public class InventoryRequisitionUseCase(
     public async Task<GetInventoryRequisitionByIdResponse?> GetByIdAsync(int id)
     {
         return await repository.GetByIdResponseAsync(id);
+    }
+
+    public async Task<int> GetPendingCountAsync()
+    {
+        return await repository.GetPendingCountAsync();
     }
 }

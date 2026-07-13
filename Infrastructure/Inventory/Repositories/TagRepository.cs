@@ -44,7 +44,7 @@ public class TagRepository(CashRegisterDbContext context, ISqlUtils sqlUtils) : 
         var query = context.Tags.AsNoTracking().AsQueryable();
             
         if (string.IsNullOrWhiteSpace(request.Term))
-            return await query.ToPagedResponseAsync(request.Page, request.PageSize);
+            return await query.OrderByDescending(t => t.Id).ToPagedResponseAsync(request.Page, request.PageSize);
 
         var term = sqlUtils.SqlLikeContains(request.Term.ToLower());
 
@@ -53,6 +53,6 @@ public class TagRepository(CashRegisterDbContext context, ISqlUtils sqlUtils) : 
             t.HexColor != null &&
             EF.Functions.ILike(t.HexColor, term)
         );
-        return await query.ToPagedResponseAsync(request.Page, request.PageSize);
+        return await query.OrderByDescending(t => t.Id).ToPagedResponseAsync(request.Page, request.PageSize);
     }
 }

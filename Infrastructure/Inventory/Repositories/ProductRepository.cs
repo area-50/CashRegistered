@@ -54,7 +54,7 @@ public class ProductRepository(CashRegisterDbContext context, ISqlUtils sqlUtils
             .AsNoTracking();
         
         if (string.IsNullOrWhiteSpace(request.Term) && request.CategoryId is null or 0)
-            return await query.ToPagedResponseAsync(request.Page, request.PageSize);
+            return await query.OrderByDescending(p => p.Id).ToPagedResponseAsync(request.Page, request.PageSize);
 
         var term = sqlUtils.SqlLikeContains(request.Term!);
         var categoryId = request.CategoryId ?? 0;
@@ -64,6 +64,6 @@ public class ProductRepository(CashRegisterDbContext context, ISqlUtils sqlUtils
                 (EF.Functions.ILike(p.Name, term) || EF.Functions.ILike(p.Sku, term))
         );
     
-        return await query.ToPagedResponseAsync(request.Page, request.PageSize);
+        return await query.OrderByDescending(p => p.Id).ToPagedResponseAsync(request.Page, request.PageSize);
     }
 }

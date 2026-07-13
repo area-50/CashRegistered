@@ -15,4 +15,6 @@ public interface IInventoryRequisitionUseCase
     Task<PagedResponse<SearchInventoryRequisitionResponse>> SearchAsync(SearchInventoryRequisitionRequest request);
     
     Task<GetInventoryRequisitionByIdResponse?> GetByIdAsync(int id);
+    
+    Task<int> GetPendingCountAsync();
 }

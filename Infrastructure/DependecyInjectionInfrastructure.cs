@@ -13,8 +13,11 @@ using Infrastructure.Security.Services;
 using Infrastructure.Security.Repositories;
 using Infrastructure.Utils;
 using Infrastructure.Utils.Interfaces;
-using Shared.Notifications;
+using Domain.Shared.Interfaces;
 using Shared.Abstractions;
+
+using Infrastructure.Notifications;
+using Shared.Notifications;
 
 namespace Infrastructure;
 
@@ -65,6 +68,8 @@ public static class DependencyInjectionInfrastructure
         services.AddScoped<IInventoryTransactionRepository, InventoryTransactionRepository>();
         
         services.AddScoped<IInventoryRequisitionRepository, InventoryRequisitionRepository>();
+
+        services.AddSingleton<INotificationService, NotificationService>();
 
         return services;
     }
