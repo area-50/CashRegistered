@@ -1,12 +1,15 @@
 using System.Text.Json;
 using Domain.Shared.Interfaces;
 using Domain.Inventory.Events;
+using Domain.Shared.Events;
 using MediatR;
 using Application.Inventory.Interfaces;
 
 namespace Application.Inventory.EventHandlers;
 
-public class RequisitionStatusChangedEventHandler : INotificationHandler<RequisitionStatusChangedEvent>
+public class RequisitionStatusChangedEventHandler : 
+    INotificationHandler<RequisitionStatusChangedEvent>,
+    INotificationHandler<ClientConnectedToTopicEvent>
 {
     private readonly INotificationService _notificationService;
     private readonly IInventoryRequisitionUseCase _useCase;
@@ -18,6 +21,19 @@ public class RequisitionStatusChangedEventHandler : INotificationHandler<Requisi
     }
 
     public async Task Handle(RequisitionStatusChangedEvent notification, CancellationToken cancellationToken)
+    {
+        await BroadcastCount();
+    }
+
+    public async Task Handle(ClientConnectedToTopicEvent notification, CancellationToken cancellationToken)
+    {
+        if (notification.Topic == "inventory.requisitions.pending")
+        {
+            await BroadcastCount();
+        }
+    }
+
+    private async Task BroadcastCount()
     {
         var pendingCount = await _useCase.GetPendingCountAsync();
 

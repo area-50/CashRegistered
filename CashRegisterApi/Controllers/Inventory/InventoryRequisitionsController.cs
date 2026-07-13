@@ -65,12 +65,4 @@ public class InventoryRequisitionsController(IInventoryRequisitionUseCase useCas
         if (result.Id == 0) return BadRequest();
         return Ok(result);
     }
-
-    [HttpGet("pending/count")]
-    [Authorize(Policy = "LogisticsOnly")]
-    public async Task<ActionResult<int>> GetPendingCount()
-    {
-        var count = await useCase.GetPendingCountAsync();
-        return Ok(count);
-    }
 }
