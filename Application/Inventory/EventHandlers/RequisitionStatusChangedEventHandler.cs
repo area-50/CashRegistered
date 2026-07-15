@@ -2,7 +2,8 @@ using System.Text.Json;
 using Domain.Shared.Interfaces;
 using Domain.Inventory.Events;
 using Domain.Shared.Events;
-using MediatR;
+using Domain.Shared.Constants;
+using Domain.Shared.Interfaces;
 using Application.Inventory.Interfaces;
 
 namespace Application.Inventory.EventHandlers;
@@ -27,7 +28,7 @@ public class RequisitionStatusChangedEventHandler :
 
     public async Task Handle(ClientConnectedToTopicEvent notification, CancellationToken cancellationToken)
     {
-        if (notification.Topic == "inventory.requisitions.pending")
+        if (notification.Topic == NotificationTopics.InventoryRequisitionsPending)
         {
             await BroadcastCount();
         }
@@ -45,6 +46,6 @@ public class RequisitionStatusChangedEventHandler :
 
         var jsonMessage = JsonSerializer.Serialize(payload);
 
-        await _notificationService.PublishAsync("inventory.requisitions.pending", jsonMessage);
+        await _notificationService.PublishAsync(NotificationTopics.InventoryRequisitionsPending, jsonMessage);
     }
 }

@@ -30,11 +30,17 @@ public class User : BaseEntity
     protected User() { }
 
     public int PersonId { get; set; }
+    
     public string HashedPassword { get; set; } = string.Empty;
+    
     public string RawPassword { get; set; }
+    
     public string UserName { get; set; }
+    
     public UserRole UserRole { get; set; }
+    
     public CashFlow? CashFlow { get; private set; }
+    
     public Person Person { get; private set; }
 
     private void Validate()

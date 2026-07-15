@@ -1,4 +1,4 @@
-using MediatR;
+using Domain.Shared.Interfaces;
 
 namespace Domain.Shared.Events;
 

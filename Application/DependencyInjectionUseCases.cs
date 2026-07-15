@@ -11,6 +11,8 @@ using Application.Services;
 using Application.Services.Strategies;
 using Application.Inventory.UseCases.Strategies;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
+using Domain.Shared.Interfaces;
 
 namespace Application;
 
@@ -63,8 +65,24 @@ public static class DependencyInjectionUseCases
         
         services.AddScoped<IInventoryRequisitionUseCase, InventoryRequisitionUseCase>();
         
-        services.AddMediatR(
-            cfg => cfg.RegisterServicesFromAssembly(typeof(DependencyInjectionUseCases).Assembly)
-        );
+        // Registro Nativo do Event Dispatcher
+        services.AddScoped<IEventDispatcher, EventDispatcher>();
+
+        // Escaneia e registra automaticamente todos os INotificationHandler do assembly
+        var assembly = typeof(DependencyInjectionUseCases).Assembly;
+        var handlerTypes = assembly.GetTypes()
+            .Where(t => !t.IsAbstract && !t.IsInterface && 
+                        t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(INotificationHandler<>)));
+
+        foreach (var type in handlerTypes)
+        {
+            var handlerInterfaces = type.GetInterfaces()
+                .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(INotificationHandler<>));
+            
+            foreach (var handlerInterface in handlerInterfaces)
+            {
+                services.AddTransient(handlerInterface, type);
+            }
+        }
     }
 }

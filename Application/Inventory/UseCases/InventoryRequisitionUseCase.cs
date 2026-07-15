@@ -1,4 +1,5 @@
 using Application.Inventory.Interfaces;
+using Domain.Shared.Interfaces;
 using Domain.Inventory.Entities;
 using Domain.Inventory.Repositories;
 using Shared.Abstractions;
@@ -14,7 +15,7 @@ public class InventoryRequisitionUseCase(
     IInventoryTransactionUseCase transactionUseCase,
     IUnitOfWork unitOfWork,
     NotificationContext notificationContext,
-    MediatR.IMediator mediator
+    IEventDispatcher dispatcher
 ) : IInventoryRequisitionUseCase
 {
     public async Task<CreateResponse> CreateRequisitionAsync(CreateInventoryRequisitionRequest request)
@@ -38,7 +39,7 @@ public class InventoryRequisitionUseCase(
         await repository.CreateAsync(requisition);
         await unitOfWork.CommitAsync();
 
-        await mediator.Publish(new Domain.Inventory.Events.RequisitionStatusChangedEvent(
+        await dispatcher.Publish(new Domain.Inventory.Events.RequisitionStatusChangedEvent(
             requisition.Id, 
             requisition.Status.ToString()
         ));
@@ -89,7 +90,7 @@ public class InventoryRequisitionUseCase(
         repository.Update(requisition);
         await unitOfWork.CommitAsync();
 
-        await mediator.Publish(new Domain.Inventory.Events.RequisitionStatusChangedEvent(
+        await dispatcher.Publish(new Domain.Inventory.Events.RequisitionStatusChangedEvent(
             requisition.Id, 
             requisition.Status.ToString()
         ));
@@ -114,7 +115,7 @@ public class InventoryRequisitionUseCase(
         repository.Update(requisition);
         await unitOfWork.CommitAsync();
 
-        await mediator.Publish(new Domain.Inventory.Events.RequisitionStatusChangedEvent(
+        await dispatcher.Publish(new Domain.Inventory.Events.RequisitionStatusChangedEvent(
             requisition.Id, 
             requisition.Status.ToString()
         ));

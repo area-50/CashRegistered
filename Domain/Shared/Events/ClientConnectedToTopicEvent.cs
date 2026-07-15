@@ -1,5 +1,3 @@
-using Domain.Shared.Events;
-
 namespace Domain.Shared.Events;
 
 public class ClientConnectedToTopicEvent : DomainEvent
