@@ -1,10 +1,9 @@
+using Domain.Shared.Events;
 using Domain.Shared.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-using Domain.Shared.Events;
-
-namespace CashRegisterApi.Controllers;
+namespace CashRegister.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

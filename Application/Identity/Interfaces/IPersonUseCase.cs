@@ -12,6 +12,8 @@ public interface IPersonUseCase
     Task<Person?> GetPersonByEmail(string email);
     
     Task<Person?> GetPersonByTaxId(string taxId);
+    
+    Task<Person?> GetPersonById(int id);
 
     Task<IEnumerable<GetAllPeopleResponse>> GetAllPeople();
 }

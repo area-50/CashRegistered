@@ -76,4 +76,9 @@ public class PersonUseCase(
             TaxId = person.TaxId
         });
     }
+
+    public Task<Person?> GetPersonById(int id)
+    {
+        return repository.GetByIdAsync(id);
+    }
 }
