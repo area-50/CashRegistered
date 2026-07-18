@@ -86,6 +86,38 @@ public class Person : BaseEntity
             AddNotification("CPF/CNPJ", "Já existe uma pessoa cadastrada com este CPF/CNPJ.");
     }
 
+    public void Update(
+        PersonType personType,
+        string firstName,
+        string lastName,
+        string taxId,
+        DateTime birthdate,
+        string email,
+        string? tradeName = null,
+        string? stateRegistration = null,
+        string? municipalRegistration = null,
+        string? cellPhone = null,
+        string? phone = null,
+        string? gender = null
+    )
+    {
+        PersonType = personType;
+        Name = new Name(firstName, lastName);
+        TaxId = taxId;
+        Birthdate = birthdate;
+        Email = email;
+        TradeName = tradeName;
+        StateRegistration = stateRegistration;
+        MunicipalRegistration = municipalRegistration;
+        CellPhone = cellPhone ?? string.Empty;
+        Phone = phone ?? string.Empty;
+        Gender = Enum.TryParse(gender, out Gender result) ? result : Enums.Gender.Other;
+
+        ClearNotifications(); // Limpar validações antigas do Flunt
+        Validate();
+        RegisterUpdate();
+    }
+
     public static void ValidatePersonExists(Person? targetPerson, NotificationContext notificationContext)
     {
         if (targetPerson == null)

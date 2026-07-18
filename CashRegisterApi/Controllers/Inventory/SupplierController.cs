@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Inventory.Request;
 
-namespace CashRegisterApi.Controllers.Inventory;
+namespace CashRegister.Controllers.Inventory;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize]
+[Authorize(Policy = "LogisticsOnly")]
 public class SupplierController(ISupplierUseCase supplierUseCase) : ControllerBase
 {
     [HttpPost]

@@ -8,6 +8,7 @@ namespace Application.Identity.Interfaces;
 public interface IPersonUseCase
 {
     Task<CreateResponse> CreatePerson(CreatePersonRequest request);
+    Task UpdatePerson(int id, UpdatePersonRequest request);
     
     Task<Person?> GetPersonByEmail(string email);
     

@@ -10,12 +10,12 @@ namespace CashRegister.Controllers.Inventory;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Policy = "ComercialOnly")] // Requisitions could be made by comercial, but fulfillment is by logistics/admin. Let's keep it broadly authenticated and specify permissions per action.
 public class InventoryRequisitionsController(IInventoryRequisitionUseCase useCase) : ControllerBase
 {
-    [HttpPost]
-    [Authorize(Policy = "LogisticsOnly")]
-    public async Task<ActionResult<CreateResponse>> Create([FromBody] CreateInventoryRequisitionRequest request)
+
+    [HttpPost("financial")]
+    [Authorize(Policy = "FinancialOnly")]
+    public async Task<ActionResult<CreateResponse>> CreateFinancialRequisition([FromBody] CreateInventoryRequisitionRequest request)
     {
         var userIdString = User.FindFirstValue(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)
                            ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -24,7 +24,7 @@ public class InventoryRequisitionsController(IInventoryRequisitionUseCase useCas
         request.RequestedByUserId = userId;
         var result = await useCase.CreateRequisitionAsync(request);
         if (result.Id == 0) return BadRequest();
-        return Created($"/api/inventoryrequisitions/{result.Id}", result);
+        return Created();
     }
 
     [HttpGet]

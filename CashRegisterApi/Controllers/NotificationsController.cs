@@ -8,27 +8,25 @@ namespace CashRegister.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class NotificationsController : ControllerBase
+public class NotificationsController(INotificationService notificationService, IEventDispatcher dispatcher)
+    : ControllerBase
 {
-    private readonly INotificationService _notificationService;
-    private readonly IEventDispatcher _dispatcher;
-
-    public NotificationsController(INotificationService notificationService, IEventDispatcher dispatcher)
+    [HttpGet("stream/inventory.requisitions.pending")]
+    [Authorize(Policy = "LogisticsOnly")]
+    public async Task StreamInventoryRequisitionsPending()
     {
-        _notificationService = notificationService;
-        _dispatcher = dispatcher;
+        await HandleStreamConnection(Domain.Shared.Constants.NotificationTopics.InventoryRequisitionsPending);
     }
 
-    [HttpGet("stream/{topic}")]
-    public async Task Stream(string topic)
+    private async Task HandleStreamConnection(string topic)
     {
         Response.Headers.Append("Content-Type", "text/event-stream");
         Response.Headers.Append("Cache-Control", "no-cache");
         Response.Headers.Append("Connection", "keep-alive");
 
-        var reader = await _notificationService.SubscribeAsync(topic, HttpContext.RequestAborted);
+        var reader = await notificationService.SubscribeAsync(topic, HttpContext.RequestAborted);
         
-        await _dispatcher.Publish(new ClientConnectedToTopicEvent(topic));
+        await dispatcher.Publish(new ClientConnectedToTopicEvent(topic));
  
         try
         {

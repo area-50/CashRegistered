@@ -1,11 +1,6 @@
 namespace Domain.Shared.Events;
 
-public class ClientConnectedToTopicEvent : DomainEvent
+public class ClientConnectedToTopicEvent(string topic) : DomainEvent
 {
-    public string Topic { get; }
-
-    public ClientConnectedToTopicEvent(string topic)
-    {
-        Topic = topic;
-    }
+    public string Topic { get; } = topic;
 }

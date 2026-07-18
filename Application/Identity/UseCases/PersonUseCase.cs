@@ -19,8 +19,8 @@ public class PersonUseCase(
 {
     public async Task<CreateResponse> CreatePerson(CreatePersonRequest request)
     {
-        var personType = Enum.IsDefined(typeof(PersonType), request.PersonType) 
-            ? (PersonType)request.PersonType 
+        var personType = Enum.TryParse<PersonType>(request.PersonType, true, out var parsedType) 
+            ? parsedType 
             : PersonType.Physical;
 
         var person = new Person(
@@ -54,6 +54,43 @@ public class PersonUseCase(
         {
             Id = person.Id
         };
+    }
+
+    public async Task UpdatePerson(int id, UpdatePersonRequest request)
+    {
+        var person = await repository.GetByIdAsync(id);
+        Person.ValidatePersonExists(person, notificationContext);
+
+        if (person == null)
+            return;
+
+        var personType = Enum.TryParse<PersonType>(request.PersonType, true, out var parsedType) 
+            ? parsedType 
+            : PersonType.Physical;
+
+        person.Update(
+            personType,
+            request.FirstName,
+            request.LastName,
+            request.TaxId,
+            request.Birthdate,
+            request.Email,
+            request.TradeName,
+            request.StateRegistration,
+            request.MunicipalRegistration,
+            request.CellPhone,
+            request.Phone,
+            request.Gender
+        );
+
+        if (person.IsInvalid)
+        {
+            notificationContext.AddNotifications(person.Notifications);
+            return;
+        }
+
+        repository.Update(person);
+        await unitOfWork.CommitAsync();
     }
 
     public Task<Person?> GetPersonByEmail(string email)

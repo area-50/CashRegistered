@@ -59,7 +59,7 @@ public class UserUseCase(
                 CellPhone = personRequest.CellPhone!,
                 Phone = personRequest.Phone!,
                 Gender = personRequest.Gender!,
-                PersonType = 1 // Default to Physical for User creation if not specified
+                PersonType = "Physical" // Default to Physical for User creation if not specified
             };
 
             var personResponse = await personUseCase.CreatePerson(createPersonRequest);

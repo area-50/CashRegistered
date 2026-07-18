@@ -2,6 +2,8 @@ using System.Reflection;
 using System.Text;
 using Application.Decorators;
 using Application.Services;
+using Application.Inventory.Interfaces;
+using Application.Inventory.UseCases;
 using Domain.Identity.Enums;
 using FluentValidation;
 using Infrastructure.Persistence;
@@ -20,6 +22,8 @@ public static class ServiceExtensions
         IConfiguration configuration
     )
     {
+        services.AddScoped<ISupplierUseCase, SupplierUseCase>();
+        services.AddScoped<ICostCenterUseCase, CostCenterUseCase>();
         services.AddScoped<IUnitOfWork>(provider =>
         {
             var dbContext = provider.GetRequiredService<CashRegisterDbContext>();

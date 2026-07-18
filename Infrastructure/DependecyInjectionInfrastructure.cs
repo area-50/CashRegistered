@@ -70,6 +70,7 @@ public static class DependencyInjectionInfrastructure
         
         services.AddScoped<IInventoryRequisitionRepository, InventoryRequisitionRepository>();
         services.AddScoped<ISupplierRepository, SupplierRepository>();
+        services.AddScoped<ICostCenterRepository, CostCenterRepository>();
 
         services.AddSingleton<INotificationService, NotificationService>();
 

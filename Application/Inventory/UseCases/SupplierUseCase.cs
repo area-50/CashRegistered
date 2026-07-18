@@ -71,7 +71,19 @@ public class SupplierUseCase(
             PersonId = supplier.PersonId,
             Name = supplier.Person.Name,
             TaxId = supplier.Person.TaxId,
-            IsActive = supplier.IsActive
+            IsActive = supplier.IsActive,
+            Person = new PersonDto
+            {
+                PersonType = supplier.Person.PersonType.ToString(),
+                Birthdate = supplier.Person.Birthdate.ToString("yyyy-MM-dd"),
+                Email = supplier.Person.Email,
+                TradeName = supplier.Person.TradeName,
+                StateRegistration = supplier.Person.StateRegistration,
+                MunicipalRegistration = supplier.Person.MunicipalRegistration,
+                CellPhone = supplier.Person.CellPhone,
+                Phone = supplier.Person.Phone,
+                Gender = supplier.Person.Gender.ToString()
+            }
         };
     }
 
@@ -107,6 +119,11 @@ public class SupplierUseCase(
             supplier.Activate();
         else
             supplier.Deactivate();
+
+        if (request.Person != null)
+        {
+            await personUseCase.UpdatePerson(supplier.PersonId, request.Person);
+        }
 
         repository.Update(supplier);
         await unitOfWork.CommitAsync();

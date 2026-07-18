@@ -42,7 +42,7 @@ public class PersonUseCaseTests
             TaxId = "12345678901",
             Birthdate = DateTime.Now.AddYears(-30),
             Email = "fernando@test.com",
-            PersonType = (int)PersonType.Physical
+            PersonType = "Physical"
         };
 
         // Act
@@ -66,7 +66,7 @@ public class PersonUseCaseTests
             TaxId = "", // Invalid
             Birthdate = DateTime.Now,
             Email = "invalid-email", // Invalid
-            PersonType = (int)PersonType.Physical
+            PersonType = "Physical"
         };
 
         // Act

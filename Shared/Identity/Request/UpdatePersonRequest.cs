@@ -1,6 +1,6 @@
 namespace Shared.Identity.Request;
 
-public class CreatePersonRequest
+public class UpdatePersonRequest
 {
     public string PersonType { get; set; } = "Physical"; // "Physical" or "Legal"
     public string FirstName { get; set; } = null!;

@@ -1,13 +1,11 @@
-using System;
+using System.Data.Common;
 using System.Net;
 using System.Text.Json;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Shared.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using System.Data.Common;
+using Shared.Exceptions;
+using Shared.Middleware;
 
-namespace CashRegisterApi.Middlewares;
+namespace CashRegister.Middlewares;
 
 public class ExceptionHandlingMiddleware
 {
@@ -23,6 +21,19 @@ public class ExceptionHandlingMiddleware
         try
         {
             await _next(context);
+
+            if (!context.Response.HasStarted)
+            {
+                switch (context.Response.StatusCode)
+                {
+                    case (int)HttpStatusCode.Forbidden:
+                        await HandleForbiddenAsync(context);
+                        break;
+                    case (int)HttpStatusCode.Unauthorized:
+                        await HandleUnauthorizedAsync(context);
+                        break;
+                }
+            }
         }
         catch (DomainException ex)
         {
@@ -58,11 +69,11 @@ public class ExceptionHandlingMiddleware
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
 
-        var response = new
+        var response = new ErrorResponse
         {
-            Type = ex.GetType().Name,
+            Title = "Atenção",
             Message = ex.Message,
-            ex.Errors
+            Errors = ex.Errors
         };
 
         return context.Response.WriteAsync(JsonSerializer.Serialize(response));
@@ -73,9 +84,9 @@ public class ExceptionHandlingMiddleware
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)HttpStatusCode.ServiceUnavailable;
 
-        var response = new
+        var response = new ErrorResponse
         {
-            Type = "ServiceUnavailable",
+            Title = "Serviço Indisponível",
             Message = "Ocorreu um erro de conexão com o banco de dados."
         };
 
@@ -87,12 +98,36 @@ public class ExceptionHandlingMiddleware
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
-        var response = new
+        var response = new ErrorResponse
         {
-            Type = "InternalServerError",
-            Message = ex.Message
+            Title = "Erro Interno do Servidor",
+            Message = "Ocorreu um erro inesperado no sistema."
         };
 
+        return context.Response.WriteAsync(JsonSerializer.Serialize(response));
+    }
+
+
+
+    private static Task HandleForbiddenAsync(HttpContext context)
+    {
+        context.Response.ContentType = "application/json";
+        var response = new ErrorResponse
+        {
+            Title = "Acesso Negado",
+            Message = "O usuário não tem autorização para esta ação."
+        };
+        return context.Response.WriteAsync(JsonSerializer.Serialize(response));
+    }
+
+    private static Task HandleUnauthorizedAsync(HttpContext context)
+    {
+        context.Response.ContentType = "application/json";
+        var response = new ErrorResponse
+        {
+            Title = "Não Autenticado",
+            Message = "Autenticação necessária para acessar este recurso."
+        };
         return context.Response.WriteAsync(JsonSerializer.Serialize(response));
     }
 }

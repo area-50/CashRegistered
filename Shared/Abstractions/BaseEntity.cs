@@ -43,6 +43,11 @@ public abstract class BaseEntity : GeneralValidator
         _notifications.AddRange(notifications);
     }
 
+    protected void ClearNotifications()
+    {
+        _notifications.Clear();
+    }
+
     protected void AddNotification(string key, string message)
     {
         _notifications.Add(new Notification(key, message));

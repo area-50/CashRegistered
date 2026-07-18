@@ -18,7 +18,7 @@ public class ProductController(IProductUseCase productUseCase) : ControllerBase
     }
 
     [HttpGet("Search")]
-    [Authorize(Policy = "LogisticsOnly")]
+    [Authorize]
     public async Task<IActionResult> SearchProducts([FromQuery] SearchProductRequest searchProductRequest)
     {
         var response = await productUseCase.SearchProducts(searchProductRequest);
@@ -34,7 +34,7 @@ public class ProductController(IProductUseCase productUseCase) : ControllerBase
     }
 
     [HttpGet("{id}/GetProductById")]
-    [Authorize(Policy = "LogisticsOnly")]
+    [Authorize]
     public async Task<IActionResult> GetProductById([FromRoute] int id)
     {
         var response = await productUseCase.GetProductById(id);
