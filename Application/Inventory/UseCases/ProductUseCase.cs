@@ -70,16 +70,20 @@ public class ProductUseCase(
         return new PagedResponse<GetSearchProductResponse>
         {
             Items = pagedProducts.Items.Select(p =>
-                new GetSearchProductResponse
             {
-                Id = p.Id,
-                Name = p.Name,
-                Sku = p.Sku,
-                Category = p.Category.Name,
-                UomSymbol = p.BaseUom.Code,
-                IsActive = p.IsActive
-            }
-            ),
+                var sb = p.StockBalances.FirstOrDefault();
+                return new GetSearchProductResponse
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Sku = p.Sku,
+                    Category = p.Category.Name,
+                    UomSymbol = p.BaseUom.Code,
+                    IsActive = p.IsActive,
+                    StockQuantity = sb?.AvailableQuantity ?? 0,
+                    WarehouseName = sb?.Warehouse.Name
+                };
+            }),
             Page = pagedProducts.Page,
             PageSize = pagedProducts.PageSize,
             TotalCount =  pagedProducts.TotalCount

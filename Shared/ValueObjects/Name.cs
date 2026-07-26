@@ -10,7 +10,9 @@ public class Name : ValueObject
         FirstName = firstName;
         LastName = lastName;
         
-        Validate(this, new NameValidator()!, errors => new DomainException(errors));
+        // Validação via FluentValidation desativada temporariamente.
+        // O Flunt agora trata essas regras na entidade Person.
+        // Validate(this, new NameValidator()!, errors => new DomainException(errors));
     }
     
     protected Name() { }

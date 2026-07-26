@@ -18,8 +18,8 @@ public class PersonConfiguration : IEntityTypeConfiguration<Person>
 
         builder.OwnsOne(person => person.Name, name =>
         {
-            name.Property(u => u.FirstName).IsRequired().HasMaxLength(100);
-            name.Property(u => u.LastName).IsRequired(false).HasMaxLength(100);
+            name.Property(u => u.FirstName).IsRequired().HasMaxLength(255);
+            name.Property(u => u.LastName).IsRequired(false).HasMaxLength(255);
         });
 
         builder.Property(person => person.TaxId)

@@ -20,6 +20,8 @@ public class UniqueConstraintStrategy : IPersistenceExceptionStrategy
         {
             "IX_Products_Sku" => new ErrorDetail("Sku", "Já existe um produto com este SKU."),
             "IX_User_Email" => new ErrorDetail("Email", "Este e-mail já está em uso."),
+            "IX_People_Email" => new ErrorDetail("Email", "Este e-mail já está em uso."),
+            "IX_People_TaxId" => new ErrorDetail("TaxId", "Este Documento (CPF/CNPJ) já está cadastrado no sistema."),
             _ => new ErrorDetail("Database", "Este registro já existe no sistema.")
         };
     }

@@ -62,7 +62,19 @@ public class Person : BaseEntity
         var contract = new Contract<Notification>()
             .Requires()
             .IsNotNullOrEmpty(TaxId, "CPF/CNPJ", "O CPF/CNPJ é obrigatório.")
-            .IsEmail(Email, "E-mail", "E-mail inválido.");
+            .IsEmail(Email, "E-mail", "E-mail inválido.")
+            .IsNotNullOrEmpty(Name.FirstName, "Nome", "O Nome/Razão Social é obrigatório.")
+            .IsLowerOrEqualsThan(Name.FirstName?.Length ?? 0, 255, "Nome", "O Nome deve ter no máximo 255 caracteres.");
+
+        if (PersonType == PersonType.Physical)
+        {
+            contract.IsNotNullOrEmpty(Name.LastName, "Sobrenome", "O sobrenome é obrigatório para Pessoas Físicas.");
+        }
+
+        if (Name.LastName?.Length > 255)
+        {
+            contract.AddNotification("Sobrenome", "O sobrenome deve ter no máximo 255 caracteres.");
+        }
         
         if (PersonType == PersonType.Legal)
         {

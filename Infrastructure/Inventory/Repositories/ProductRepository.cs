@@ -51,7 +51,20 @@ public class ProductRepository(CashRegisterDbContext context, ISqlUtils sqlUtils
         var query = context.Products
             .Include(p => p.Category)
             .Include(p => p.BaseUom)
-            .AsNoTracking();
+            .AsQueryable();
+
+        if (request.WarehouseId.HasValue && request.WarehouseId > 0)
+        {
+            query = query.Include(p => p.StockBalances.Where(sb => sb.WarehouseId == request.WarehouseId))
+                         .ThenInclude(sb => sb.Warehouse);
+        }
+        else
+        {
+            query = query.Include(p => p.StockBalances.Where(sb => sb.Warehouse.IsPrincipal))
+                         .ThenInclude(sb => sb.Warehouse);
+        }
+
+        query = query.AsNoTracking();
         
         if (string.IsNullOrWhiteSpace(request.Term) && request.CategoryId is null or 0)
             return await query.OrderByDescending(p => p.Id).ToPagedResponseAsync(request.Page, request.PageSize);

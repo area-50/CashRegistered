@@ -14,4 +14,7 @@ public class GetSearchProductResponse
     
     public bool IsActive { get; set; }
 
+    public decimal StockQuantity { get; set; }
+    
+    public string? WarehouseName { get; set; }
 }

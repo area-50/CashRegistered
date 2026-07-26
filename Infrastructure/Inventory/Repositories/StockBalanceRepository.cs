@@ -59,10 +59,9 @@ public class StockBalanceRepository(CashRegisterDbContext context) : IStockBalan
             );
         }
 
-        if (request.WarehouseId.HasValue)
-        {
-            query = query.Where(x => x.WarehouseId == request.WarehouseId.Value);
-        }
+        query = request.WarehouseId.HasValue 
+            ? query.Where(x => x.WarehouseId == request.WarehouseId.Value) 
+            : query.Where(x => x.Warehouse.IsPrincipal);
 
         if (request.CategoryId.HasValue)
         {

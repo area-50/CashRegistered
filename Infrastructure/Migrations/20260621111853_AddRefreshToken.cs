@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Infrastructure.Infrastructure.Migrations
+namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class AddRefreshToken : Migration
