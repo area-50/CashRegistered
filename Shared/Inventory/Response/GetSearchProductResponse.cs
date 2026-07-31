@@ -12,6 +12,8 @@ public class GetSearchProductResponse
     
     public string UomSymbol { get; set; }
     
+    public int BaseUomId { get; set; }
+    
     public bool IsActive { get; set; }
 
     public decimal StockQuantity { get; set; }
