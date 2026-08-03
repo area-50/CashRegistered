@@ -1,7 +1,7 @@
 using Application.Inventory.Interfaces;
-using Domain.Shared.Interfaces;
-using Domain.Inventory.Entities;
+using Domain.Inventory.Enums;
 using Domain.Inventory.Repositories;
+using Domain.Shared.Interfaces;
 using Shared.Abstractions;
 using Shared.Inventory.Request;
 using Shared.Inventory.Response;
@@ -11,11 +11,11 @@ using Shared.Response;
 namespace Application.Inventory.UseCases;
 
 public class InventoryRequisitionUseCase(
-    IInventoryRequisitionRepository repository,
     IInventoryTransactionUseCase transactionUseCase,
-    IUnitOfWork unitOfWork,
+    IInventoryTransactionRepository transactionRepository,
     NotificationContext notificationContext,
-    IEventDispatcher dispatcher
+    IEventDispatcher dispatcher,
+    IProductUseCase productUseCase
 ) : IInventoryRequisitionUseCase
 {
     public async Task<CreateResponse> CreateRequisitionAsync(CreateInventoryRequisitionRequest request)
@@ -26,115 +26,150 @@ public class InventoryRequisitionUseCase(
             return new CreateResponse { Id = 0 };
         }
 
-        var requisition = new InventoryRequisition(request.OriginModule, request.RequestedByUserId, request.Notes);
-
+        var transactionItems = new List<CreateInventoryTransactionItemRequest>();
         foreach (var item in request.Items)
         {
-            requisition.AddItem(item.ProductId, item.Quantity);
+            var product = await productUseCase.GetById(item.ProductId);
+            if (product != null)
+            {
+                transactionItems.Add(new CreateInventoryTransactionItemRequest
+                {
+                    ProductId = item.ProductId,
+                    UomId = product.BaseUomId,
+                    TransactionQuantity = item.Quantity,
+                    BaseQuantity = item.Quantity,
+                    SourceWarehouseId = null
+                });
+            }
         }
 
-        if (requisition.IsInvalid || notificationContext.Notifications.Any())
-            return new CreateResponse { Id = 0 };
+        var transactionRequest = new CreateInventoryTransactionRequest
+        {
+            UserId = request.RequestedByUserId,
+            TransactionType = "RequisitionExit",
+            ReferenceDocument = $"REQ-{request.OriginModule}", // We use reference document to store origin
+            Name = $"REQ:{request.OriginModule}",
+            Description = request.Notes,
+            Status = "Pending",
+            Items = transactionItems
+        };
 
-        await repository.CreateAsync(requisition);
-        await unitOfWork.CommitAsync();
+        var response = await transactionUseCase.CreateTransaction(transactionRequest);
 
-        await dispatcher.Publish(new Domain.Inventory.Events.RequisitionStatusChangedEvent(
-            requisition.Id, 
-            requisition.Status.ToString()
-        ));
-
-        return new CreateResponse { Id = requisition.Id };
+        if (response.Id > 0)
+        {
+            await dispatcher.Publish(new Domain.Inventory.Events.RequisitionStatusChangedEvent(
+                response.Id, 
+                "Pending"
+            ));
+            return new CreateResponse {Id = response.Id};
+        }
+        return new CreateResponse {Id = 0};
     }
 
     public async Task<UpdateResponse> FulfillRequisitionAsync(
         int requisitionId, int fulfilledByUserId, FulfillInventoryRequisitionRequest request
     )
     {
-        var requisition = await repository.GetByIdAsync(requisitionId);
-        if (requisition == null)
+        var response = await transactionUseCase.UpdateTransactionStatusAsync(requisitionId, "Completed", request.SourceWarehouseId);
+        if (response.Id > 0)
         {
-            notificationContext.AddNotification("Requisition", "Requisição não encontrada.");
-            return new UpdateResponse { Id = 0 };
+            await dispatcher.Publish(new Domain.Inventory.Events.RequisitionStatusChangedEvent(
+                response.Id, 
+                "Completed"
+            ));
         }
-        
-        requisition.Fulfill();
-
-        if (requisition.IsInvalid || notificationContext.Notifications.Any())
-            return new UpdateResponse { Id = 0 };
-
-        var transactionRequest = new CreateInventoryTransactionRequest
-        {
-            UserId = fulfilledByUserId,
-            TransactionType = "RequisitionExit",
-            ReferenceDocument = $"REQ-{requisition.Id}",
-            Name = $"Atendimento Requisição {requisition.Id}",
-            Description = $"Origem: {requisition.OriginModule}",
-            Items = requisition.Items.Select(x => new CreateInventoryTransactionItemRequest
-            {
-                ProductId = x.ProductId,
-                UomId = x.Product.BaseUomId,
-                TransactionQuantity = x.Quantity,
-                BaseQuantity = x.Quantity,
-                SourceWarehouseId = request.SourceWarehouseId
-            }).ToList()
-        };
-
-        var transactionResponse = await transactionUseCase.CreateTransaction(transactionRequest);
-
-        if (transactionResponse.Id == 0)
-        {
-            return new UpdateResponse { Id = 0 };
-        }
-
-        repository.Update(requisition);
-        await unitOfWork.CommitAsync();
-
-        await dispatcher.Publish(new Domain.Inventory.Events.RequisitionStatusChangedEvent(
-            requisition.Id, 
-            requisition.Status.ToString()
-        ));
-
-        return new UpdateResponse { Id = requisition.Id };
+        return response;
     }
 
     public async Task<UpdateResponse> CancelRequisitionAsync(int requisitionId)
     {
-        var requisition = await repository.GetByIdAsync(requisitionId);
-        if (requisition == null)
+        var response = await transactionUseCase.UpdateTransactionStatusAsync(requisitionId, "Cancelled");
+        if (response.Id > 0)
         {
-            notificationContext.AddNotification("Requisition", "Requisição não encontrada.");
-            return new UpdateResponse { Id = 0 };
+            await dispatcher.Publish(new Domain.Inventory.Events.RequisitionStatusChangedEvent(
+                response.Id, 
+                "Cancelled"
+            ));
         }
-
-        requisition.Cancel();
-
-        if (requisition.IsInvalid || notificationContext.Notifications.Any())
-            return new UpdateResponse { Id = 0 };
-
-        repository.Update(requisition);
-        await unitOfWork.CommitAsync();
-
-        await dispatcher.Publish(new Domain.Inventory.Events.RequisitionStatusChangedEvent(
-            requisition.Id, 
-            requisition.Status.ToString()
-        ));
-
-        return new UpdateResponse { Id = requisition.Id };
+        return response;
     }
 
     public async Task<PagedResponse<SearchInventoryRequisitionResponse>> SearchAsync(SearchInventoryRequisitionRequest request)
     {
-        return await repository.SearchAsync(request);
+        var searchRequest = new SearchInventoryTransactionRequest
+        {
+            Page = request.Page,
+            PageSize = request.PageSize,
+            TransactionType = "RequisitionExit",
+            TransactionStatus = request.Status,
+            StartDate = request.StartDate,
+            EndDate = request.EndDate
+        };
+
+        var pagedTransactions = await transactionRepository.SearchAsync(searchRequest);
+
+        var mappedItems = pagedTransactions.Items.Select(t => new SearchInventoryRequisitionResponse
+        {
+            Id = t.Id,
+            OriginModule = t.Name.StartsWith("REQ:") ? t.Name.Substring(4) : t.Name,
+            RequestedByUserId = t.UserId,
+            RequestedByUserName = t.User?.UserName ?? "Desconhecido",
+            Status = t.Status.ToString(),
+            CreatedAt = t.DateTime,
+            FulfilledAt = t.Status == TransactionStatus.Completed ? t.DateTime : null,
+            IsActive = t.IsActive
+        }).ToList();
+
+        return new PagedResponse<SearchInventoryRequisitionResponse>
+        {
+            Items = mappedItems,
+            TotalCount = pagedTransactions.TotalCount,
+            Page = pagedTransactions.Page,
+            PageSize = pagedTransactions.PageSize
+        };
     }
 
     public async Task<GetInventoryRequisitionByIdResponse?> GetByIdAsync(int id)
     {
-        return await repository.GetByIdResponseAsync(id);
+        var t = await transactionRepository.GetDetailsAsync(id);
+        if (t == null) return null;
+
+        var originModule = t.Name.StartsWith("REQ:") ? t.Name.Substring(4) : t.Name;
+
+        // Tentar obter a entidade base para pegar o User
+        var baseTransaction = await transactionRepository.GetByIdAsync(id);
+
+        return new GetInventoryRequisitionByIdResponse
+        {
+            Id = t.Id,
+            OriginModule = originModule,
+            RequestedByUserId = baseTransaction?.UserId ?? 0,
+            RequestedByUserName = baseTransaction?.User?.UserName ?? "Desconhecido",
+            Status = t.TransactionStatus,
+            CreatedAt = t.CreatedAt,
+            FulfilledAt = t.TransactionStatus == "Completed" ? t.CreatedAt : null,
+            Notes = t.Description,
+            Items = t.Items.Select(i => new GetInventoryRequisitionItemResponse
+            {
+                Id = i.Id,
+                ProductId = i.ProductId,
+                ProductName = i.ProductName,
+                Quantity = i.Quantity
+            }).ToList()
+        };
     }
 
     public async Task<int> GetPendingCountAsync()
     {
-        return await repository.GetPendingCountAsync();
+        var searchRequest = new SearchInventoryTransactionRequest
+        {
+            Page = 1,
+            PageSize = 1,
+            TransactionType = "RequisitionExit",
+            TransactionStatus = "Pending"
+        };
+        var result = await transactionRepository.SearchAsync(searchRequest);
+        return result.TotalCount;
     }
 }

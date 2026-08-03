@@ -13,9 +13,9 @@ public interface IProductUseCase
     
     Task<Product?> GetById(int productId);
     
-    Task<GetProductByIdResponse> GetProductById(int productId);
-
-    Task<UpdateResponse> UpdateProduct(int id, UpdateProductRequest request);
+    Task<Shared.Inventory.Response.GetProductByIdResponse> GetProductById(int productId);
+    Task<IEnumerable<Shared.Inventory.Response.ProductConversionItemResponse>> GetProductConversions(int productId);
+    Task<Shared.Response.UpdateResponse> UpdateProduct(int id, Shared.Inventory.Request.UpdateProductRequest request);
     
     Task Deactivate(int productId);
 }

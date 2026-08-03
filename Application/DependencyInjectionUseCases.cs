@@ -10,6 +10,7 @@ using Application.Interfaces;
 using Application.Services;
 using Application.Services.Strategies;
 using Application.Inventory.UseCases.Strategies;
+using Application.Inventory.UseCases.TransactionStatusHandlers;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using Domain.Shared.Interfaces;
@@ -55,6 +56,22 @@ public static class DependencyInjectionUseCases
         
         services.AddScoped<IInventoryTransactionUseCase, InventoryTransactionUseCase>();
         
+        services.AddScoped<PendingStatusHandler>();
+        services.AddScoped<CompletedStatusHandler>();
+        services.AddScoped<CancelledStatusHandler>();
+        
+        services.AddScoped<ITransactionStatusHandler>(provider =>
+        {
+            var pending = provider.GetRequiredService<PendingStatusHandler>();
+            var completed = provider.GetRequiredService<CompletedStatusHandler>();
+            var cancelled = provider.GetRequiredService<CancelledStatusHandler>();
+
+            pending.SetNext(completed);
+            completed.SetNext(cancelled);
+
+            return pending; 
+        });
+
         services.AddScoped<IInventoryRequisitionUseCase, InventoryRequisitionUseCase>();
         
         services.AddScoped<ISupplierUseCase, SupplierUseCase>();

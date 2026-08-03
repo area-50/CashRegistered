@@ -15,6 +15,7 @@ public class ProductUseCase(
     IProductRepository repository,
     IStockBalanceUseCase stockBalanceUseCase,
     IWarehouseUseCase warehouseUseCase,
+    IUomConversionUseCase uomConversionUseCase,
     NotificationContext notificationContext,
     IUnitOfWork unitOfWork
 ) : IProductUseCase
@@ -79,6 +80,7 @@ public class ProductUseCase(
                     Sku = p.Sku,
                     Category = p.Category.Name,
                     UomSymbol = p.BaseUom.Code,
+                    BaseUomId = p.BaseUomId,
                     IsActive = p.IsActive,
                     StockQuantity = sb?.AvailableQuantity ?? 0,
                     WarehouseName = sb?.Warehouse.Name
@@ -155,5 +157,32 @@ public class ProductUseCase(
     
         repository.Update(product);
         await unitOfWork.CommitAsync();
+    }
+
+    public async Task<IEnumerable<ProductConversionItemResponse>> GetProductConversions(int productId)
+    {
+        var product = await repository.GetByIdAsync(productId);
+        if (product == null) return Enumerable.Empty<ProductConversionItemResponse>();
+
+        var result = new List<ProductConversionItemResponse>
+        {
+            new()
+            {
+                UomId = product.BaseUomId,
+                UomSymbol = product.BaseUom!.Code,
+                Multiplier = 1,
+                RuleType = "Base"
+            }
+        };
+
+        var otherRules = await uomConversionUseCase.GetRulesForProductAsync(productId, product.BaseUomId);
+        
+        var uniqueOtherRules = otherRules
+            .Where(r => r.UomId != product.BaseUomId)
+            .OrderByDescending(r => r.RuleType == "ProductSpecific" ? 1 : 0);
+
+        result.AddRange(uniqueOtherRules);
+
+        return result;
     }
 }

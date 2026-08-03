@@ -20,11 +20,6 @@ public class EntryTransactionStrategy(
     {
         foreach (var itemReq in items)
         {
-            var item = new InventoryTransactionItem(
-                0, itemReq.ProductId, itemReq.UomId, itemReq.TransactionQuantity, 
-                itemReq.BaseQuantity, itemReq.SourceWarehouseId, itemReq.DestinationWarehouseId);
-            
-            transaction.AddItem(item);
 
             if (itemReq.DestinationWarehouseId == null)
             {

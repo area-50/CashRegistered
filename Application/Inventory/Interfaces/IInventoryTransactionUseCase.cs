@@ -11,5 +11,7 @@ public interface IInventoryTransactionUseCase
     
     Task<PagedResponse<GetSearchInventoryTransactionResponse>> SearchAsync(SearchInventoryTransactionRequest request);
     
-    Task<GetInventoryTransactionByIdResponse?> GetByIdAsync(int id);
+    Task<Shared.Inventory.Response.GetInventoryTransactionByIdResponse?> GetByIdAsync(int id);
+    
+    Task<UpdateResponse> UpdateTransactionStatusAsync(int transactionId, string newStatusStr, int? sourceWarehouseId = null);
 }

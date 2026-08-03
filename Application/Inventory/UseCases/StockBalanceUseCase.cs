@@ -22,4 +22,31 @@ public class StockBalanceUseCase(IStockBalanceRepository repository) : IStockBal
     {
         return await repository.GetAvailableBalanceAsync(productId, warehouseId);
     }
+
+    public async Task ReserveStockAsync(int productId, int warehouseId, decimal quantity)
+    {
+        var balances = await repository.FindAsync(x => x.ProductId == productId && x.WarehouseId == warehouseId);
+        var balance = balances.FirstOrDefault();
+        if (balance == null) return;
+        balance.Reserve(quantity);
+        repository.Update(balance);
+    }
+
+    public async Task ReleaseStockReservationAsync(int productId, int warehouseId, decimal quantity)
+    {
+        var balances = await repository.FindAsync(x => x.ProductId == productId && x.WarehouseId == warehouseId);
+        var balance = balances.FirstOrDefault();
+        if (balance == null) return;
+        balance.ReleaseReservation(quantity);
+        repository.Update(balance);
+    }
+
+    public async Task ConsumeStockReservationAsync(int productId, int warehouseId, decimal quantity)
+    {
+        var balances = await repository.FindAsync(x => x.ProductId == productId && x.WarehouseId == warehouseId);
+        var balance = balances.FirstOrDefault();
+        if (balance == null) return;
+        balance.ConsumeReservation(quantity);
+        repository.Update(balance);
+    }
 }

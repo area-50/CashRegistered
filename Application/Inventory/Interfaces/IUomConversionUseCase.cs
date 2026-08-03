@@ -1,4 +1,3 @@
-using Domain.Inventory.Repositories;
 using Shared.Inventory.Request;
 using Shared.Inventory.Response;
 using Shared.Response;
@@ -16,4 +15,7 @@ public interface IUomConversionUseCase
     Task<UpdateResponse> UpdateUomConversion(int id, UpdateUomConversionRequest request);
 
     Task DeactivateUomConversion(int uomId);
+
+    Task<GetUomConversionRuleResponse?> GetConversionRule(GetUomConversionRuleRequest request);
+    Task<IEnumerable<Shared.Inventory.Response.ProductConversionItemResponse>> GetRulesForProductAsync(int productId, int baseUomId);
 }

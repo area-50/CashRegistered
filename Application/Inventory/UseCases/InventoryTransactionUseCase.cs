@@ -10,8 +10,10 @@ using Shared.Response;
 namespace Application.Inventory.UseCases;
 
 public class InventoryTransactionUseCase(
-    IEnumerable<IInventoryTransactionStrategy> strategies,
+    ITransactionStatusHandler statusChain,
     IInventoryTransactionRepository transactionRepository,
+    IProductUseCase productUseCase,
+    IStockBalanceUseCase stockBalanceUseCase,
     IUnitOfWork unitOfWork,
     NotificationContext notificationContext
 ) : IInventoryTransactionUseCase
@@ -30,24 +32,76 @@ public class InventoryTransactionUseCase(
             return new CreateResponse { Id = 0 };
         }
 
+        TransactionStatus status = TransactionStatus.Completed;
+        if (!string.IsNullOrEmpty(request.Status) && Enum.TryParse(request.Status, out TransactionStatus parsedStatus))
+        {
+            status = parsedStatus;
+        }
+
+        foreach (var item in request.Items)
+        {
+            var product = await productUseCase.GetById(item.ProductId);
+            if (product == null)
+            {
+                notificationContext.AddNotification("Product", "Produto não encontrado.");
+                return new CreateResponse { Id = 0 };
+            }
+
+            if (item.UomId != product.BaseUomId)
+            {
+                var productConversions = await productUseCase.GetProductConversions(product.Id);
+                var matchingConversions = productConversions.Where(c => c.UomId == item.UomId).ToList();
+
+                if (!matchingConversions.Any())
+                {
+                    notificationContext.AddNotification("UomConversion", $"Nenhuma regra de conversão encontrada na árvore para {product.Name}");
+                    return new CreateResponse { Id = 0 };
+                }
+
+                bool isValidMath = matchingConversions.Any(c => 
+                    item.BaseQuantity == item.TransactionQuantity * c.Multiplier);
+                
+                if (!isValidMath)
+                {
+                    notificationContext.AddNotification(
+                        "BaseQuantity",
+                        $"Valores corrompidos ou inconsistentes. A conversão submetida não se encaixa nas regras ativas do produto."
+                    );
+                    return new CreateResponse { Id = 0 };
+                }
+            }
+            else 
+            {
+                if (item.BaseQuantity != item.TransactionQuantity)
+                {
+                     notificationContext.AddNotification(
+                         "BaseQuantity",
+                         "Quantidade base deve ser igual à quantidade da transação quando as unidades são idênticas."
+                    );
+                     return new CreateResponse { Id = 0 };
+                }
+            }
+        }
+
         var transaction = new InventoryTransaction(
             request.UserId, 
             type, 
             request.ReferenceDocument, 
             request.Name, 
-            request.Description);
+            request.Description,
+            status
+        );
 
-        var strategy = strategies.FirstOrDefault(s => s.AppliesTo(type));
-        
-        if (strategy == null)
+        foreach (var itemReq in request.Items)
         {
-            notificationContext.AddNotification(
-                "Transaction", "Nenhuma estratégia encontrada para este tipo de transação."
-            );
-            return new CreateResponse { Id = 0 };
+            var item = new InventoryTransactionItem(
+                0, itemReq.ProductId, itemReq.UomId, itemReq.TransactionQuantity, 
+                itemReq.BaseQuantity, itemReq.SourceWarehouseId, itemReq.DestinationWarehouseId);
+            
+            transaction.AddItem(item);
         }
 
-        await strategy.ProcessTransactionAsync(transaction, request.Items);
+        await statusChain.ProcessAsync(transaction, request.Items);
 
         if (notificationContext.Notifications.Any() || transaction.IsInvalid)
             return new CreateResponse { Id = 0 };
@@ -70,7 +124,7 @@ public class InventoryTransactionUseCase(
             Name = x.Name,
             Description = x.Description,
             TransactionDate = x.DateTime,
-            IsActive = true // Mandatório
+            TransactionStatus = x.Status.ToString()
         }).ToList();
 
         return new PagedResponse<Shared.Inventory.Response.GetSearchInventoryTransactionResponse>
@@ -84,33 +138,92 @@ public class InventoryTransactionUseCase(
 
     public async Task<Shared.Inventory.Response.GetInventoryTransactionByIdResponse?> GetByIdAsync(int id)
     {
-        var transaction = await transactionRepository.GetByIdAsync(id);
+        return await transactionRepository.GetDetailsAsync(id);
+    }
 
+    public async Task<UpdateResponse> UpdateTransactionStatusAsync(int transactionId, string newStatusStr, int? sourceWarehouseId = null)
+    {
+        var transaction = await transactionRepository.GetByIdAsync(transactionId);
         if (transaction == null)
         {
-            return null;
+            notificationContext.AddNotification("Transaction", "Transação não encontrada.");
+            return new UpdateResponse { Id = 0 };
         }
 
-        return new Shared.Inventory.Response.GetInventoryTransactionByIdResponse
+        if (!Enum.TryParse(newStatusStr, out TransactionStatus newStatus))
         {
-            Id = transaction.Id,
-            TransactionType = transaction.Type.ToString(),
-            ReferenceDocument = transaction.ReferenceDocument,
-            Name = transaction.Name,
-            Description = transaction.Description,
-            CreatedAt = transaction.DateTime,
-            IsActive = true, // Mandatório
-            Items = transaction.Items.Select(i => new Shared.Inventory.Response.InventoryTransactionItemResponse
+            notificationContext.AddNotification("Status", "Status inválido.");
+            return new UpdateResponse { Id = 0 };
+        }
+
+        var oldStatus = transaction.Status;
+
+        if (newStatus == TransactionStatus.Completed)
+        {
+            if (sourceWarehouseId.HasValue && transaction.Type == TransactionType.RequisitionExit)
             {
-                Id = i.Id,
-                ProductId = i.ProductId,
-                ProductName = i.Product.Name,
-                Quantity = i.TransactionQuantity,
-                SourceWarehouseId = i.SourceWarehouseId,
-                SourceWarehouseName = i.SourceWarehouse?.Name,
-                DestinationWarehouseId = i.DestinationWarehouseId,
-                DestinationWarehouseName = i.DestinationWarehouse?.Name
-            }).ToList()
-        };
+                // Injetar o Almoxarifado fornecido no atendimento da requisição
+                foreach (var item in transaction.Items)
+                {
+                    item.UpdateSourceWarehouse(sourceWarehouseId.Value);
+                }
+            }
+            transaction.Fulfill();
+        }
+        else if (newStatus == TransactionStatus.Cancelled)
+        {
+            transaction.Cancel();
+        }
+        else
+        {
+            notificationContext.AddNotification("Status", "Transição de status não suportada.");
+            return new UpdateResponse { Id = 0 };
+        }
+
+        if (transaction.IsInvalid || notificationContext.Notifications.Any())
+            return new UpdateResponse { Id = 0 };
+
+        if (oldStatus == TransactionStatus.Pending && newStatus == TransactionStatus.Completed)
+        {
+            var requestItems = transaction.Items.Select(x => new CreateInventoryTransactionItemRequest
+            {
+                ProductId = x.ProductId,
+                UomId = x.UomId,
+                TransactionQuantity = x.TransactionQuantity,
+                BaseQuantity = x.BaseQuantity,
+                SourceWarehouseId = x.SourceWarehouseId,
+                DestinationWarehouseId = x.DestinationWarehouseId
+            }).ToList();
+
+            foreach (var item in transaction.Items)
+            {
+                if (item.SourceWarehouseId.HasValue)
+                {
+                    await stockBalanceUseCase.ConsumeStockReservationAsync(
+                        item.ProductId, item.SourceWarehouseId.Value, item.BaseQuantity);
+                }
+            }
+            
+            await statusChain.ProcessAsync(transaction, requestItems);
+        }
+        else if (oldStatus == TransactionStatus.Pending && newStatus == TransactionStatus.Cancelled)
+        {
+            var requestItems = transaction.Items.Select(x => new CreateInventoryTransactionItemRequest
+            {
+                ProductId = x.ProductId,
+                UomId = x.UomId,
+                TransactionQuantity = x.TransactionQuantity,
+                BaseQuantity = x.BaseQuantity,
+                SourceWarehouseId = x.SourceWarehouseId,
+                DestinationWarehouseId = x.DestinationWarehouseId
+            }).ToList();
+            
+            await statusChain.ProcessAsync(transaction, requestItems);
+        }
+
+        transactionRepository.Update(transaction);
+        await unitOfWork.CommitAsync();
+
+        return new UpdateResponse { Id = transaction.Id };
     }
 }
