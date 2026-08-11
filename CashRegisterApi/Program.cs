@@ -12,7 +12,6 @@ using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 // --- 1. SEÇÃO DE SERVIÇOS (Injeção de Dependência) ---
 
@@ -23,6 +22,7 @@ builder.Services.AddControllers(options =>
 .AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    options.JsonSerializerOptions.Converters.Add(new CashRegisterApi.Converters.UtcDateTimeConverter());
 });
 
 builder.Services.AddInfrastructure(builder.Configuration);

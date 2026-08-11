@@ -14,7 +14,9 @@ public class CancelledStatusHandler(
         return transaction.Status == TransactionStatus.Cancelled;
     }
 
-    protected override async Task HandleAsync(InventoryTransaction transaction, IEnumerable<CreateInventoryTransactionItemRequest> requestItems)
+    protected override async Task HandleAsync(
+        InventoryTransaction transaction, IEnumerable<CreateInventoryTransactionItemRequest> requestItems
+    )
     {
         foreach (var item in requestItems)
         {

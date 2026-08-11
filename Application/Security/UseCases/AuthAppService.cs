@@ -47,7 +47,8 @@ public class AuthAppService(
                 RefreshToken = refreshToken.Token,
                 UserName = user.UserName,
                 Name = user.Person.Name,
-                Role = user.UserRole.ToString()
+                Role = user.UserRole.ToString(),
+                Timezone = user.Timezone
             };
         }
         

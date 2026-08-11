@@ -3,24 +3,17 @@ using Domain.Shared.Interfaces;
 using Domain.Inventory.Events;
 using Domain.Shared.Events;
 using Domain.Shared.Constants;
-using Domain.Shared.Interfaces;
 using Application.Inventory.Interfaces;
 
 namespace Application.Inventory.EventHandlers;
 
-public class RequisitionStatusChangedEventHandler : 
-    INotificationHandler<RequisitionStatusChangedEvent>,
-    INotificationHandler<ClientConnectedToTopicEvent>
+public class RequisitionStatusChangedEventHandler(
+    INotificationService notificationService,
+    IInventoryRequisitionUseCase useCase)
+    :
+        INotificationHandler<RequisitionStatusChangedEvent>,
+        INotificationHandler<ClientConnectedToTopicEvent>
 {
-    private readonly INotificationService _notificationService;
-    private readonly IInventoryRequisitionUseCase _useCase;
-
-    public RequisitionStatusChangedEventHandler(INotificationService notificationService, IInventoryRequisitionUseCase useCase)
-    {
-        _notificationService = notificationService;
-        _useCase = useCase;
-    }
-
     public async Task Handle(RequisitionStatusChangedEvent notification, CancellationToken cancellationToken)
     {
         await BroadcastCount();
@@ -36,7 +29,7 @@ public class RequisitionStatusChangedEventHandler :
 
     private async Task BroadcastCount()
     {
-        var pendingCount = await _useCase.GetPendingCountAsync();
+        var pendingCount = await useCase.GetPendingCountAsync();
 
         var payload = new
         {
@@ -46,6 +39,6 @@ public class RequisitionStatusChangedEventHandler :
 
         var jsonMessage = JsonSerializer.Serialize(payload);
 
-        await _notificationService.PublishAsync(NotificationTopics.InventoryRequisitionsPending, jsonMessage);
+        await notificationService.PublishAsync(NotificationTopics.InventoryRequisitionsPending, jsonMessage);
     }
 }

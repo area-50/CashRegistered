@@ -74,14 +74,47 @@ public class InventoryTransactionRepository(CashRegisterDbContext context) : IIn
             query = query.Where(x => x.Type == type);
         }
 
-        if (request.IsActive.HasValue)
+        if (!string.IsNullOrWhiteSpace(request.TransactionStatus) &&
+            Enum.TryParse<Domain.Inventory.Enums.TransactionStatus>(
+                request.TransactionStatus, true, out var status
+            ))
         {
-            query = query.Where(x => x.IsActive == request.IsActive.Value);
+            query = query.Where(x => x.Status == status);
         }
 
         return await query
             .OrderByDescending(x => x.DateTime)
             .ThenByDescending(x => x.Id)
             .ToPagedResponseAsync(request.Page, request.PageSize);
+    }
+
+    public async Task<Shared.Inventory.Response.GetInventoryTransactionByIdResponse?> GetDetailsAsync(int id)
+    {
+        return await context.InventoryTransactions
+            .Where(x => x.Id == id)
+            .Select(x => new Shared.Inventory.Response.GetInventoryTransactionByIdResponse
+            {
+                Id = x.Id,
+                TransactionType = x.Type.ToString(),
+                ReferenceDocument = x.ReferenceDocument,
+                Name = x.Name,
+                Description = x.Description,
+                CreatedAt = x.DateTime,
+                TransactionStatus = x.Status.ToString(),
+                Items = x.Items.Select(i => new Shared.Inventory.Response.InventoryTransactionItemResponse
+                {
+                    Id = i.Id,
+                    ProductId = i.ProductId,
+                    ProductName = i.Product.Name,
+                    Quantity = i.TransactionQuantity,
+                    SourceWarehouseId = i.SourceWarehouseId,
+                    SourceWarehouseName = i.SourceWarehouse != null ? i.SourceWarehouse.Name : null,
+                    DestinationWarehouseId = i.DestinationWarehouseId,
+                    DestinationWarehouseName = i.DestinationWarehouse != null ? i.DestinationWarehouse.Name : null,
+                    UomSymbol = i.Uom.Code,
+                    UomName = i.Uom.Name
+                }).ToList()
+            })
+            .FirstOrDefaultAsync();
     }
 }

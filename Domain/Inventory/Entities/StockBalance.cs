@@ -74,4 +74,44 @@ public class StockBalance : BaseEntity
         }
         AvailableQuantity -= quantity;
     }
+
+    public void Reserve(decimal quantity)
+    {
+        if (quantity <= 0)
+        {
+            AddNotification("StockBalance", "A quantidade de reserva deve ser maior que zero.");
+            return;
+        }
+        if (AvailableQuantity < quantity)
+        {
+            AddNotification("StockBalance", "Saldo disponível insuficiente para realizar a reserva.");
+            return;
+        }
+        AvailableQuantity -= quantity;
+        ReservedQuantity += quantity;
+    }
+
+    public void ReleaseReservation(decimal quantity)
+    {
+        if (quantity <= 0) return;
+        if (ReservedQuantity < quantity)
+        {
+            AddNotification("StockBalance", "Quantidade a ser liberada é maior que o saldo reservado.");
+            return;
+        }
+        ReservedQuantity -= quantity;
+        AvailableQuantity += quantity;
+    }
+
+    public void ConsumeReservation(decimal quantity)
+    {
+        if (quantity <= 0) return;
+        if (ReservedQuantity < quantity)
+        {
+            AddNotification("StockBalance", "Quantidade a ser consumida é maior que o saldo reservado.");
+            return;
+        }
+        ReservedQuantity -= quantity;
+        // Do not add to AvailableQuantity because it was actually consumed (exited physical stock)
+    }
 }

@@ -26,5 +26,6 @@ public abstract class BaseTransactionStatusHandler : ITransactionStatusHandler
     }
 
     protected abstract bool CanHandle(InventoryTransaction transaction);
+    
     protected abstract Task HandleAsync(InventoryTransaction transaction, IEnumerable<CreateInventoryTransactionItemRequest> requestItems);
 }

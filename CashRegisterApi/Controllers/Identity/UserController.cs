@@ -78,5 +78,17 @@ public class UserController(IUserUseCase user) : ControllerBase
             Data = response
         });
     }
-}
 
+    [HttpPut("timezone")]
+    [Authorize]
+    public async Task<IActionResult> UpdateTimezone([FromBody] UpdateTimezoneRequest request)
+    {
+        var userIdString = User.FindFirstValue(JwtRegisteredClaimNames.Sub)
+                           ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+        
+        if (!int.TryParse(userIdString, out int userId)) return Unauthorized();
+        
+        await user.UpdateTimezone(userId, request);
+        return Ok();
+    }
+}

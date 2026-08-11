@@ -56,4 +56,9 @@ public class InventoryTransactionItem : BaseEntity
             
         AddNotifications(contract.Notifications);
     }
+
+    public void UpdateSourceWarehouse(int sourceWarehouseId)
+    {
+        SourceWarehouseId = sourceWarehouseId;
+    }
 }

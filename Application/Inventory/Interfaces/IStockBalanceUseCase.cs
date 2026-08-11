@@ -13,4 +13,6 @@ public interface IStockBalanceUseCase
     Task ReserveStockAsync(int productId, int warehouseId, decimal quantity);
     Task ReleaseStockReservationAsync(int productId, int warehouseId, decimal quantity);
     Task ConsumeStockReservationAsync(int productId, int warehouseId, decimal quantity);
+    Task<StockBalance> GetStockBalanceAsync(int productId, int warehouseId, bool isEntry = false);
+    void Update(StockBalance balance);
 }

@@ -8,5 +8,5 @@ public class SearchInventoryTransactionRequest : PagedRequest
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
     public string? TransactionType { get; set; }
-    public bool? IsActive { get; set; }
+    public string? TransactionStatus { get; set; }
 }

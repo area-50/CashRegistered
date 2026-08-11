@@ -54,4 +54,13 @@ public class UomConversionController(
         var response = await uomConversionCase.UpdateUomConversion(id, request);
         return Ok(response);
     }
+
+    [HttpGet("rule")]
+    [Authorize(Policy = "LogisticsOnly")]
+    public async Task<IActionResult> GetConversionRule([FromQuery] GetUomConversionRuleRequest request)
+    {
+        var rule = await uomConversionCase.GetConversionRule(request);
+        if (rule == null) return NoContent();
+        return Ok(rule);
+    }
 }

@@ -15,7 +15,7 @@ public class StockBalanceUseCaseTests
     public StockBalanceUseCaseTests()
     {
         _repositoryMock = new Mock<IStockBalanceRepository>();
-        _useCase = new StockBalanceUseCase(_repositoryMock.Object);
+        _useCase = new StockBalanceUseCase(_repositoryMock.Object, new Shared.Notifications.NotificationContext());
     }
 
     [Fact]

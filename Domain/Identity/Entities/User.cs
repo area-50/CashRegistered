@@ -43,6 +43,14 @@ public class User : BaseEntity
     
     public Person Person { get; private set; }
 
+    public string Timezone { get; private set; } = "America/Sao_Paulo";
+
+    public void UpdateTimezone(string timezone)
+    {
+        if (!string.IsNullOrWhiteSpace(timezone))
+            Timezone = timezone;
+    }
+
     private void Validate()
     {
         var contract = new Contract<Notification>()

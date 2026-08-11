@@ -75,4 +75,20 @@ public class UomConversionRepository(
 
         return await query.OrderByDescending(u => u.Id).ToPagedResponseAsync(request.Page, request.PageSize);
     }
+
+    public Task<UomConversion?> GetRuleAsync(int fromUomId, int toUomId, int? productId)
+    {
+        return context.UomConversions
+            .Where(u => u.FromUomId == fromUomId && u.ToUomId == toUomId && u.ProductId == productId)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<IEnumerable<UomConversion>> GetRulesForProductAsync(int productId)
+    {
+        return await context.UomConversions
+            .Include(c => c.FromUom)
+            .Include(c => c.ToUom)
+            .Where(c => (c.ProductId == productId || c.ProductId == null) && c.IsActive)
+            .ToListAsync();
+    }
 }

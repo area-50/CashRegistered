@@ -33,5 +33,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .WithOne()
             .HasForeignKey<User>(user => user.PersonId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Property(user => user.Timezone)
+            .IsRequired()
+            .HasMaxLength(100)
+            .HasDefaultValue("America/Sao_Paulo");
     }
 }

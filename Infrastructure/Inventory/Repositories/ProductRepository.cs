@@ -28,6 +28,7 @@ public class ProductRepository(CashRegisterDbContext context, ISqlUtils sqlUtils
     {
         return await context.Products
             .Include(p => p.Tags)
+            .Include(p => p.BaseUom)
             .Where(p => p.Id == id).FirstOrDefaultAsync();
     }
 

@@ -1,14 +1,16 @@
 using Application.Inventory.Interfaces;
+using Domain.Inventory.Entities;
 using Domain.Inventory.Repositories;
 using Shared.Inventory.Request;
 using Shared.Inventory.Response;
+using Shared.Notifications;
 using Shared.Response;
 
 namespace Application.Inventory.UseCases;
 
-public class StockBalanceUseCase(IStockBalanceRepository repository) : IStockBalanceUseCase
+public class StockBalanceUseCase(IStockBalanceRepository repository, NotificationContext notificationContext) : IStockBalanceUseCase
 {
-    public async Task AddRangeAsync(IEnumerable<Domain.Inventory.Entities.StockBalance> stockBalances)
+    public async Task AddRangeAsync(IEnumerable<StockBalance> stockBalances)
     {
         await repository.AddRangeAsync(stockBalances);
     }
@@ -47,6 +49,25 @@ public class StockBalanceUseCase(IStockBalanceRepository repository) : IStockBal
         var balance = balances.FirstOrDefault();
         if (balance == null) return;
         balance.ConsumeReservation(quantity);
+        repository.Update(balance);
+    }
+
+    public async Task<StockBalance> GetStockBalanceAsync(int productId, int warehouseId, bool isEntry = false)
+    {
+        var balances = await repository.FindAsync(x => x.ProductId == productId && x.WarehouseId == warehouseId);
+        var balance = balances.FirstOrDefault();
+
+        if (balance != null) return balance;
+        if (!isEntry)
+        {
+            notificationContext.AddNotification("StockBalance", "Saldo não encontrado na origem para este produto.");
+        }
+        return new StockBalance(productId, warehouseId);
+
+    }
+
+    public void Update(StockBalance balance)
+    {
         repository.Update(balance);
     }
 }

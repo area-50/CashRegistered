@@ -18,8 +18,16 @@ public class ProductController(IProductUseCase productUseCase) : ControllerBase
     }
 
     [HttpGet("Search")]
-    [Authorize]
+    [Authorize(Policy = "LogisticsOnly")]
     public async Task<IActionResult> SearchProducts([FromQuery] SearchProductRequest searchProductRequest)
+    {
+        var response = await productUseCase.SearchProducts(searchProductRequest);
+        return Ok(response);
+    }
+
+    [HttpGet("SearchShared")]
+    [Authorize]
+    public async Task<IActionResult> SearchSharedProducts([FromQuery] SearchProductRequest searchProductRequest)
     {
         var response = await productUseCase.SearchProducts(searchProductRequest);
         return Ok(response);
@@ -31,6 +39,14 @@ public class ProductController(IProductUseCase productUseCase) : ControllerBase
     {
         await productUseCase.Deactivate(productId);
         return Ok();
+    }
+
+    [HttpGet("{id}/conversions")]
+    [Authorize]
+    public async Task<IActionResult> GetProductConversions(int id)
+    {
+        var result = await productUseCase.GetProductConversions(id);
+        return Ok(result);
     }
 
     [HttpGet("{id}/GetProductById")]

@@ -208,6 +208,27 @@ public class UserUseCase(
         };
     }
 
+    public async Task UpdateTimezone(int userId, UpdateTimezoneRequest request)
+    {
+        var user = await repository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            notificationContext.AddNotification("User", "O usuário não existe.");
+            return;
+        }
+
+        user.UpdateTimezone(request.Timezone);
+
+        if (user.IsInvalid)
+        {
+            notificationContext.AddNotifications(user.Notifications);
+            return;
+        }
+
+        repository.Update(user);
+        await unitOfWork.CommitAsync();
+    }
+
     public async Task<GetMeResponse> GetMe(int userId)
     {
         var user = await repository.GetByIdAsync(userId);
@@ -221,7 +242,8 @@ public class UserUseCase(
         {
             UserName = user.UserName,
             Name = user.Person.Name,
-            Role = user.UserRole.ToString()
+            Role = user.UserRole.ToString(),
+            Timezone = user.Timezone
         };
     }
 

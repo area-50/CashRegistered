@@ -1,15 +1,15 @@
+using Application.Inventory.Interfaces;
 using Domain.Inventory.Entities;
 using Domain.Inventory.Enums;
-using Domain.Inventory.Repositories;
 using Shared.Inventory.Request;
 using Shared.Notifications;
 
 namespace Application.Inventory.UseCases.Strategies;
 
 public class EntryTransactionStrategy(
-    IStockBalanceRepository stockBalanceRepository,
+    IStockBalanceUseCase stockBalanceUseCase,
     NotificationContext notificationContext
-) : BaseInventoryTransactionStrategy(stockBalanceRepository, notificationContext)
+) : BaseInventoryTransactionStrategy(stockBalanceUseCase, notificationContext)
 {
     public override bool AppliesTo(TransactionType type)
     {
@@ -23,14 +23,14 @@ public class EntryTransactionStrategy(
 
             if (itemReq.DestinationWarehouseId == null)
             {
-                _notificationContext.AddNotification("Warehouse", "Almoxarifado de destino é obrigatório para entrada.");
+                NotificationContext.AddNotification("Warehouse", "Almoxarifado de destino é obrigatório para entrada.");
                 continue;
             }
 
-            var balance = await GetStockBalanceAsync(itemReq.ProductId, itemReq.DestinationWarehouseId.Value, isEntry: true);
+            var balance = await StockBalanceUseCase.GetStockBalanceAsync(itemReq.ProductId, itemReq.DestinationWarehouseId.Value, isEntry: true);
             balance.AddStock(itemReq.BaseQuantity);
             
-            _stockBalanceRepository.Update(balance);
+            StockBalanceUseCase.Update(balance);
         }
     }
 }

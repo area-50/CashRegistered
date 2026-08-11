@@ -1,13 +1,15 @@
-using System;
-
 namespace Shared.Inventory.Response;
 
 public class GetSearchInventoryTransactionResponse
 {
     public int Id { get; set; }
+    
     public string TransactionType { get; set; } = string.Empty;
+    
     public string? ReferenceDocument { get; set; }
+    
     public string? Name { get; set; }
+    
     public string? Description { get; set; }
     
     /// <summary>
@@ -15,5 +17,5 @@ public class GetSearchInventoryTransactionResponse
     /// </summary>
     public DateTime TransactionDate { get; set; }
     
-    public bool IsActive { get; set; }
+    public string TransactionStatus { get; set; } = string.Empty;
 }

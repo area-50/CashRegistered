@@ -4,6 +4,7 @@ using Domain.Inventory.Enums;
 using Domain.Inventory.Repositories;
 using Shared.Abstractions;
 using Shared.Inventory.Request;
+using Shared.Inventory.Response;
 using Shared.Notifications;
 using Shared.Response;
 
@@ -50,7 +51,9 @@ public class InventoryTransactionUseCase(
             if (item.UomId != product.BaseUomId)
             {
                 var productConversions = await productUseCase.GetProductConversions(product.Id);
-                var matchingConversions = productConversions.Where(c => c.UomId == item.UomId).ToList();
+                var matchingConversions = productConversions
+                    .Where(c => c.UomId == item.UomId)
+                    .ToList();
 
                 if (!matchingConversions.Any())
                 {
@@ -96,7 +99,8 @@ public class InventoryTransactionUseCase(
         {
             var item = new InventoryTransactionItem(
                 0, itemReq.ProductId, itemReq.UomId, itemReq.TransactionQuantity, 
-                itemReq.BaseQuantity, itemReq.SourceWarehouseId, itemReq.DestinationWarehouseId);
+                itemReq.BaseQuantity, itemReq.SourceWarehouseId, itemReq.DestinationWarehouseId
+             );
             
             transaction.AddItem(item);
         }
@@ -112,11 +116,11 @@ public class InventoryTransactionUseCase(
         return new CreateResponse { Id = transaction.Id };
     }
 
-    public async Task<PagedResponse<Shared.Inventory.Response.GetSearchInventoryTransactionResponse>> SearchAsync(SearchInventoryTransactionRequest request)
+    public async Task<PagedResponse<GetSearchInventoryTransactionResponse>> SearchAsync(SearchInventoryTransactionRequest request)
     {
         var pagedTransactions = await transactionRepository.SearchAsync(request);
 
-        var responseItems = pagedTransactions.Items.Select(x => new Shared.Inventory.Response.GetSearchInventoryTransactionResponse
+        var responseItems = pagedTransactions.Items.Select(x => new GetSearchInventoryTransactionResponse
         {
             Id = x.Id,
             TransactionType = x.Type.ToString(),
@@ -127,7 +131,7 @@ public class InventoryTransactionUseCase(
             TransactionStatus = x.Status.ToString()
         }).ToList();
 
-        return new PagedResponse<Shared.Inventory.Response.GetSearchInventoryTransactionResponse>
+        return new PagedResponse<GetSearchInventoryTransactionResponse>
         {
             Items = responseItems,
             TotalCount = pagedTransactions.TotalCount,
@@ -136,7 +140,7 @@ public class InventoryTransactionUseCase(
         };
     }
 
-    public async Task<Shared.Inventory.Response.GetInventoryTransactionByIdResponse?> GetByIdAsync(int id)
+    public async Task<GetInventoryTransactionByIdResponse?> GetByIdAsync(int id)
     {
         return await transactionRepository.GetDetailsAsync(id);
     }
@@ -157,6 +161,12 @@ public class InventoryTransactionUseCase(
         }
 
         var oldStatus = transaction.Status;
+
+        // Captura o estado original dos itens para saber se houve reserva prévia (apenas se tinham SourceWarehouseId)
+        var originallyReservedItems = transaction.Items
+            .Where(i => i.SourceWarehouseId.HasValue)
+            .Select(i => new { i.ProductId, WarehouseId = i.SourceWarehouseId.Value, i.BaseQuantity })
+            .ToList();
 
         if (newStatus == TransactionStatus.Completed)
         {
@@ -195,13 +205,11 @@ public class InventoryTransactionUseCase(
                 DestinationWarehouseId = x.DestinationWarehouseId
             }).ToList();
 
-            foreach (var item in transaction.Items)
+            // Consumir apenas o saldo que foi EFETIVAMENTE reservado no momento do Pending
+            foreach (var reservedItem in originallyReservedItems)
             {
-                if (item.SourceWarehouseId.HasValue)
-                {
-                    await stockBalanceUseCase.ConsumeStockReservationAsync(
-                        item.ProductId, item.SourceWarehouseId.Value, item.BaseQuantity);
-                }
+                await stockBalanceUseCase.ConsumeStockReservationAsync(
+                    reservedItem.ProductId, reservedItem.WarehouseId, reservedItem.BaseQuantity);
             }
             
             await statusChain.ProcessAsync(transaction, requestItems);
@@ -220,6 +228,10 @@ public class InventoryTransactionUseCase(
             
             await statusChain.ProcessAsync(transaction, requestItems);
         }
+
+        // Previne o commit caso o ProcessAsync (Strategies) tenha gerado notificações de erro (ex: saldo insuficiente)
+        if (notificationContext.Notifications.Any())
+            return new UpdateResponse { Id = 0 };
 
         transactionRepository.Update(transaction);
         await unitOfWork.CommitAsync();

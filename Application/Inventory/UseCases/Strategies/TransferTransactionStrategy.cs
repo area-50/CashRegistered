@@ -1,15 +1,15 @@
+using Application.Inventory.Interfaces;
 using Domain.Inventory.Entities;
 using Domain.Inventory.Enums;
-using Domain.Inventory.Repositories;
 using Shared.Inventory.Request;
 using Shared.Notifications;
 
 namespace Application.Inventory.UseCases.Strategies;
 
 public class TransferTransactionStrategy(
-    IStockBalanceRepository stockBalanceRepository,
+    IStockBalanceUseCase stockBalanceUseCase,
     NotificationContext notificationContext
-) : BaseInventoryTransactionStrategy(stockBalanceRepository, notificationContext)
+) : BaseInventoryTransactionStrategy(stockBalanceUseCase, notificationContext)
 {
     public override bool AppliesTo(TransactionType type)
     {
@@ -23,27 +23,27 @@ public class TransferTransactionStrategy(
 
             if (itemReq.SourceWarehouseId == null || itemReq.DestinationWarehouseId == null)
             {
-                _notificationContext.AddNotification("Warehouse", "Origem e destino são obrigatórios para transferências.");
+                NotificationContext.AddNotification("Warehouse", "Origem e destino são obrigatórios para transferências.");
                 continue;
             }
 
             // 1. Remover da Origem
-            var sourceBalance = await GetStockBalanceAsync(itemReq.ProductId, itemReq.SourceWarehouseId.Value, isEntry: false);
+            var sourceBalance = await StockBalanceUseCase.GetStockBalanceAsync(itemReq.ProductId, itemReq.SourceWarehouseId.Value, isEntry: false);
             sourceBalance.RemoveStock(itemReq.BaseQuantity);
             
             if (sourceBalance.IsInvalid) 
             {
-                _notificationContext.AddNotifications(sourceBalance.Notifications);
+                NotificationContext.AddNotifications(sourceBalance.Notifications);
                 continue; // Interrompe para não adicionar no destino indevidamente
             }
             
-            _stockBalanceRepository.Update(sourceBalance);
+            StockBalanceUseCase.Update(sourceBalance);
 
             // 2. Adicionar ao Destino
-            var destinationBalance = await GetStockBalanceAsync(itemReq.ProductId, itemReq.DestinationWarehouseId.Value, isEntry: true);
+            var destinationBalance = await StockBalanceUseCase.GetStockBalanceAsync(itemReq.ProductId, itemReq.DestinationWarehouseId.Value, isEntry: true);
             destinationBalance.AddStock(itemReq.BaseQuantity);
             
-            _stockBalanceRepository.Update(destinationBalance);
+            StockBalanceUseCase.Update(destinationBalance);
         }
     }
 }

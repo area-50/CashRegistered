@@ -11,4 +11,5 @@ public class LoginUserResponse
     public Name? Name { get; set; }
 
     public string Role { get; set; } = string.Empty;
+    public string Timezone { get; set; } = "America/Sao_Paulo";
 }

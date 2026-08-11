@@ -12,6 +12,6 @@ public class GetInventoryTransactionByIdResponse
     public string? Description { get; set; }
     public string? Notes { get; set; }
     public DateTime CreatedAt { get; set; }
-    public bool IsActive { get; set; }
+    public string TransactionStatus { get; set; } = string.Empty;
     public List<InventoryTransactionItemResponse> Items { get; set; } = new();
 }

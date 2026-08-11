@@ -19,6 +19,7 @@ public class ProductUseCaseTests
     private readonly Mock<IProductRepository> _productRepositoryMock;
     private readonly Mock<IStockBalanceUseCase> _stockBalanceUseCaseMock;
     private readonly Mock<IWarehouseUseCase> _warehouseUseCaseMock;
+    private readonly Mock<IUomConversionUseCase> _uomConversionUseCaseMock;
     private readonly NotificationContext _notificationContext;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly ProductUseCase _productUseCase;
@@ -29,6 +30,7 @@ public class ProductUseCaseTests
         _productRepositoryMock = new Mock<IProductRepository>();
         _stockBalanceUseCaseMock = new Mock<IStockBalanceUseCase>();
         _warehouseUseCaseMock = new Mock<IWarehouseUseCase>();
+        _uomConversionUseCaseMock = new Mock<IUomConversionUseCase>();
         _notificationContext = new NotificationContext();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
 
@@ -37,6 +39,7 @@ public class ProductUseCaseTests
             _productRepositoryMock.Object,
             _stockBalanceUseCaseMock.Object,
             _warehouseUseCaseMock.Object,
+            _uomConversionUseCaseMock.Object,
             _notificationContext,
             _unitOfWorkMock.Object
         );
