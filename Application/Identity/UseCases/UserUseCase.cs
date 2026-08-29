@@ -258,4 +258,16 @@ public class UserUseCase(
         User.ValidateUserLoginExists(user, notificationContext);
         return user;
     }
+
+    public async Task<IEnumerable<GetTimezoneResponse>> GetTimezones()
+    {
+        var timezones = TimeZoneInfo.GetSystemTimeZones()
+            .Select(tz => new GetTimezoneResponse
+            {
+                Id = tz.Id,
+                DisplayName = tz.DisplayName
+            });
+
+        return await Task.FromResult(timezones);
+    }
 }

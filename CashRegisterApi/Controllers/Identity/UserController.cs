@@ -91,4 +91,12 @@ public class UserController(IUserUseCase user) : ControllerBase
         await user.UpdateTimezone(userId, request);
         return Ok();
     }
+
+    [HttpGet("timezones")]
+    [Authorize]
+    public async Task<IActionResult> GetTimezones()
+    {
+        var response = await user.GetTimezones();
+        return Ok(response);
+    }
 }

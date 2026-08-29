@@ -31,4 +31,6 @@ public interface IUserUseCase
     Task<PagedResponse<GetAllUsersResponse>> SearchUsers(SearchUserRequest request);
     
     Task<GetMeResponse> GetMe(int userId);
+    
+    Task<IEnumerable<GetTimezoneResponse>> GetTimezones();
 }
