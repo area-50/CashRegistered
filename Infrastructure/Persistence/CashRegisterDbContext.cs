@@ -23,6 +23,26 @@ public class CashRegisterDbContext(DbContextOptions<CashRegisterDbContext> optio
     public DbSet<CashFlow> CashFlows { get; set; }
     public DbSet<Expense> Expenses { get; set; }
     public DbSet<CostCenter> CostCenters { get; set; }
+    
+    public DbSet<ChartOfAccounts> ChartOfAccounts { get; set; }
+    
+    public DbSet<FinancialAccount> FinancialAccounts { get; set; }
+    
+    public DbSet<FinancialDocument> FinancialDocuments { get; set; }
+    
+    public DbSet<FinancialInstallment> FinancialInstallments { get; set; }
+    
+    public DbSet<FinancialCostCenterAllocation> FinancialCostCenterAllocations { get; set; }
+    
+    public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
+    
+    public DbSet<JournalEntry> JournalEntries { get; set; }
+    
+    public DbSet<JournalEntryItem> JournalEntryItems { get; set; }
+    
+    public DbSet<BankStatementImport> BankStatementImports { get; set; }
+    
+    public DbSet<BankStatementItem> BankStatementItems { get; set; }
 
     // Inventory - Classificação e Produtos
     public DbSet<Category> Categories { get; set; }
@@ -35,18 +55,24 @@ public class CashRegisterDbContext(DbContextOptions<CashRegisterDbContext> optio
     public DbSet<Warehouse> Warehouses { get; set; }
     public DbSet<StockBalance> StockBalances { get; set; }
     public DbSet<InventoryTransaction> InventoryTransactions { get; set; }
+    
     public DbSet<InventoryTransactionItem> InventoryTransactionItems { get; set; }
 
 
     // Inventory - Suprimentos e Compras
     public DbSet<Supplier> Suppliers { get; set; }
+    
     public DbSet<PurchaseRequisition> PurchaseRequisitions { get; set; }
+    
     public DbSet<PurchaseRequisitionItem> PurchaseRequisitionItems { get; set; }
+    
     public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
+    
     public DbSet<PurchaseOrderItem> PurchaseOrderItems { get; set; }
 
     // Inventory - Consumo Interno
     public DbSet<InternalRequisition> InternalRequisitions { get; set; }
+    
     public DbSet<InternalRequisitionItem> InternalRequisitionItems { get; set; }
 
     // Business / Audit
