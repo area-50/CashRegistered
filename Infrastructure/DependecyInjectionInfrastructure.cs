@@ -2,6 +2,7 @@ using Domain.Financial.Repositories;
 using Domain.Identity.Repositories;
 using Domain.Inventory.Repositories;
 using Domain.Inventory.Interfaces;
+using Domain.Financial.Interfaces;
 using Domain.Security.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

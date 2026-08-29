@@ -1,14 +1,14 @@
 using System.Linq.Expressions;
-using Domain.Inventory.Entities;
-using Domain.Inventory.Interfaces;
+using Domain.Financial.Entities;
+using Domain.Financial.Interfaces;
 using Infrastructure.Persistence;
 using Infrastructure.Common;
 using Microsoft.EntityFrameworkCore;
 using Shared.Abstractions;
 using Shared.Response;
-using Shared.Inventory.Request;
+using Shared.Financial.Request;
 
-namespace Infrastructure.Inventory.Repositories;
+namespace Infrastructure.Financial.Repositories;
 
 public class CostCenterRepository(CashRegisterDbContext context) : ICostCenterRepository
 {

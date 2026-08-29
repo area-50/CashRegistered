@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Shared.Inventory.Request;
+namespace Shared.Financial.Request;
 
 public class UpdateCostCenterRequest
 {

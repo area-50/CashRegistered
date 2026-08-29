@@ -1,9 +1,9 @@
-using Domain.Inventory.Entities;
+using Domain.Financial.Entities;
 using Shared.Abstractions;
-using Shared.Inventory.Request;
+using Shared.Financial.Request;
 using Shared.Response;
 
-namespace Domain.Inventory.Interfaces;
+namespace Domain.Financial.Interfaces;
 
 public interface ICostCenterRepository : IRepository<CostCenter>
 {

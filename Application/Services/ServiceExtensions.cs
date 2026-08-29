@@ -4,6 +4,8 @@ using Application.Decorators;
 using Application.Services;
 using Application.Inventory.Interfaces;
 using Application.Inventory.UseCases;
+using Application.Financial.Interfaces;
+using Application.Financial.UseCases;
 using Domain.Identity.Enums;
 using FluentValidation;
 using Infrastructure.Persistence;

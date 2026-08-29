@@ -22,6 +22,7 @@ public class CashRegisterDbContext(DbContextOptions<CashRegisterDbContext> optio
     // Financial
     public DbSet<CashFlow> CashFlows { get; set; }
     public DbSet<Expense> Expenses { get; set; }
+    public DbSet<CostCenter> CostCenters { get; set; }
 
     // Inventory - Classificação e Produtos
     public DbSet<Category> Categories { get; set; }
@@ -45,7 +46,6 @@ public class CashRegisterDbContext(DbContextOptions<CashRegisterDbContext> optio
     public DbSet<PurchaseOrderItem> PurchaseOrderItems { get; set; }
 
     // Inventory - Consumo Interno
-    public DbSet<CostCenter> CostCenters { get; set; }
     public DbSet<InternalRequisition> InternalRequisitions { get; set; }
     public DbSet<InternalRequisitionItem> InternalRequisitionItems { get; set; }
 

@@ -1,14 +1,14 @@
 using Application.Identity.Interfaces;
-using Application.Inventory.Interfaces;
-using Domain.Inventory.Entities;
-using Domain.Inventory.Interfaces;
+using Application.Financial.Interfaces;
+using Domain.Financial.Entities;
+using Domain.Financial.Interfaces;
 using Shared.Abstractions;
-using Shared.Inventory.Request;
-using Shared.Inventory.Response;
+using Shared.Financial.Request;
+using Shared.Financial.Response;
 using Shared.Notifications;
 using Shared.Response;
 
-namespace Application.Inventory.UseCases;
+namespace Application.Financial.UseCases;
 
 public class CostCenterUseCase(
     ICostCenterRepository repository,

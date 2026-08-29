@@ -1,9 +1,9 @@
-using Application.Inventory.Interfaces;
+using Application.Financial.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Shared.Inventory.Request;
+using Shared.Financial.Request;
 
-namespace CashRegisterApi.Controllers.Inventory;
+namespace CashRegisterApi.Controllers.Financial;
 
 [ApiController]
 [Route("api/[controller]")]

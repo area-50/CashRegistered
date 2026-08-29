@@ -1,7 +1,7 @@
 using Domain.Identity.Entities;
 using Shared.Abstractions;
 
-namespace Domain.Inventory.Entities;
+namespace Domain.Financial.Entities;
 
 public class CostCenter : BaseEntity
 {

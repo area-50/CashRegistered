@@ -1,6 +1,6 @@
 using Shared.Abstractions;
 
-namespace Shared.Inventory.Request;
+namespace Shared.Financial.Request;
 
 public class SearchCostCenterRequest : PagedRequest
 {

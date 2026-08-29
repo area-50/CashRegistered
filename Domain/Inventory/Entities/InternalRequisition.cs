@@ -1,4 +1,5 @@
 using Domain.Inventory.Enums;
+using Domain.Financial.Entities;
 using Shared.Abstractions;
 
 namespace Domain.Inventory.Entities;

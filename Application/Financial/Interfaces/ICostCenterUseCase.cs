@@ -1,9 +1,9 @@
 using Shared.Abstractions;
-using Shared.Inventory.Request;
-using Shared.Inventory.Response;
+using Shared.Financial.Request;
+using Shared.Financial.Response;
 using Shared.Response;
 
-namespace Application.Inventory.Interfaces;
+namespace Application.Financial.Interfaces;
 
 public interface ICostCenterUseCase
 {

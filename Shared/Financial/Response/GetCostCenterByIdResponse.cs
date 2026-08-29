@@ -1,4 +1,4 @@
-namespace Shared.Inventory.Response;
+namespace Shared.Financial.Response;
 
 public class GetCostCenterByIdResponse
 {
