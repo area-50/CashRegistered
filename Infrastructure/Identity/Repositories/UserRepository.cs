@@ -3,13 +3,14 @@ using Domain.Identity.Entities;
 using Domain.Identity.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.Persistence;
-using Shared.Identity.Request;
-using Shared.Response;
+using Infrastructure.Utils.Interfaces;
+using Domain.Shared.DTOs;
+using Domain.Shared.Response;
 using Infrastructure.Common;
 
 namespace Infrastructure.Identity.Repositories;
 
-public class UserRepository(CashRegisterDbContext context) : IUserRepository
+public class UserRepository(CashRegisterDbContext context, ISqlUtils sqlUtils) : IUserRepository
 {
     public async Task CreateAsync(User entity) => await context.Users.AddAsync(entity);
 
@@ -47,15 +48,27 @@ public class UserRepository(CashRegisterDbContext context) : IUserRepository
 
     public async Task<PagedResponse<User>> SearchAsync(SearchUserRequest request)
     {
-        return await context.Users
+        var query = context.Users
             .Include(u => u.Person)
-            .Where(u => string.IsNullOrWhiteSpace(request.Name) || 
-                        u.Person.Name.FirstName.ToLower().Contains(request.Name.ToLower()) || 
-                        u.Person.Name.LastName.ToLower().Contains(request.Name.ToLower()))
-            .Where(u => string.IsNullOrWhiteSpace(request.TaxId) || 
-                        u.Person.TaxId.Contains(request.TaxId))
-            .Where(u => !request.BirthDate.HasValue || 
-                        u.Person.Birthdate.Date == request.BirthDate.Value.Date)
+            .AsNoTracking();
+
+        query = sqlUtils.WhereAnd(
+            query, !string.IsNullOrWhiteSpace(request.Name),
+            u => EF.Functions.ILike(u.Person.Name.FirstName, sqlUtils.SqlLikeContains(request.Name!.Trim())) ||
+                 EF.Functions.ILike(u.Person.Name.LastName, sqlUtils.SqlLikeContains(request.Name!.Trim()))
+        );
+
+        query = sqlUtils.WhereAnd(
+            query, !string.IsNullOrWhiteSpace(request.TaxId),
+            u => EF.Functions.ILike(u.Person.TaxId, sqlUtils.SqlLikeContains(request.TaxId!.Trim()))
+        );
+
+        query = sqlUtils.WhereAnd(
+            query, request.BirthDate.HasValue,
+            u => u.Person.Birthdate.Date == request.BirthDate!.Value.Date
+        );
+
+        return await query
             .OrderByDescending(u => u.Id)
             .ToPagedResponseAsync(request.Page, request.PageSize);
     }

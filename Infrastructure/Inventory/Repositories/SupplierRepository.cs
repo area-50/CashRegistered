@@ -3,15 +3,15 @@ using Domain.Inventory.Entities;
 using Domain.Inventory.Interfaces;
 using Infrastructure.Persistence;
 using Infrastructure.Common;
+using Infrastructure.Utils.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Shared.Abstractions;
-using Shared.Response;
-
-using Shared.Inventory.Request;
+using Domain.Shared.Abstractions;
+using Domain.Shared.Response;
+using Domain.Shared.DTOs;
 
 namespace Infrastructure.Inventory.Repositories;
 
-public class SupplierRepository(CashRegisterDbContext context) : ISupplierRepository
+public class SupplierRepository(CashRegisterDbContext context, ISqlUtils sqlUtils) : ISupplierRepository
 {
     public async Task CreateAsync(Supplier entity) => await context.Suppliers.AddAsync(entity);
 
@@ -35,22 +35,20 @@ public class SupplierRepository(CashRegisterDbContext context) : ISupplierReposi
             .Include(s => s.Person)
             .AsNoTracking();
 
-        if (!string.IsNullOrWhiteSpace(request.Name))
-        {
-            var search = request.Name.ToLower();
-            query = query.Where(s => 
-                s.Person.Name.FirstName.ToLower().Contains(search) || 
-                s.Person.Name.LastName.ToLower().Contains(search)
-            );
-        }
+        query = sqlUtils.WhereAnd(
+            query, !string.IsNullOrWhiteSpace(request.Name),
+            s => EF.Functions.ILike(s.Person.Name.FirstName, sqlUtils.SqlLikeContains(request.Name!.Trim())) ||
+                 EF.Functions.ILike(s.Person.Name.LastName, sqlUtils.SqlLikeContains(request.Name!.Trim()))
+        );
 
-        if (!string.IsNullOrWhiteSpace(request.TaxId))
-        {
-            query = query.Where(s => s.Person.TaxId != null && s.Person.TaxId.Contains(request.TaxId));
-        }
+        query = sqlUtils.WhereAnd(
+            query, !string.IsNullOrWhiteSpace(request.TaxId),
+            s => s.Person.TaxId != null && EF.Functions.ILike(s.Person.TaxId, sqlUtils.SqlLikeContains(request.TaxId!.Trim()))
+        );
 
         return await query
             .OrderByDescending(s => s.Id)
             .ToPagedResponseAsync(request.Page, request.PageSize);
     }
 }
+

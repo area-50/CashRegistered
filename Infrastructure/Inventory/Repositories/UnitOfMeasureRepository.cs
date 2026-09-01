@@ -5,8 +5,8 @@ using Infrastructure.Common;
 using Infrastructure.Persistence;
 using Infrastructure.Utils.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Shared.Inventory.Request;
-using Shared.Response;
+using Domain.Shared.DTOs;
+using Domain.Shared.Response;
 
 namespace Infrastructure.Inventory.Repositories;
 

@@ -2,14 +2,15 @@ using System.Linq.Expressions;
 using Domain.Inventory.Entities;
 using Domain.Inventory.Repositories;
 using Infrastructure.Persistence;
+using Infrastructure.Utils.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Shared.Response;
-using Shared.Inventory.Request;
+using Domain.Shared.Response;
+using Domain.Shared.DTOs;
 using Infrastructure.Common;
 
 namespace Infrastructure.Inventory.Repositories;
 
-public class InventoryTransactionRepository(CashRegisterDbContext context) : IInventoryTransactionRepository
+public class InventoryTransactionRepository(CashRegisterDbContext context, ISqlUtils sqlUtils) : IInventoryTransactionRepository
 {
     public async Task CreateAsync(InventoryTransaction entity)
     {
@@ -50,37 +51,34 @@ public class InventoryTransactionRepository(CashRegisterDbContext context) : IIn
     {
         var query = context.InventoryTransactions.AsQueryable();
 
-        if (!string.IsNullOrWhiteSpace(request.ReferenceDocument))
-        {
-            var term = request.ReferenceDocument.ToLower();
-            query = query.Where(x => x.ReferenceDocument != null && x.ReferenceDocument.ToLower().Contains(term));
-        }
+        query = sqlUtils.WhereAnd(
+            query, !string.IsNullOrWhiteSpace(request.ReferenceDocument),
+            x => x.ReferenceDocument != null && EF.Functions.ILike(x.ReferenceDocument, sqlUtils.SqlLikeContains(request.ReferenceDocument!.Trim()))
+        );
 
-        if (request.StartDate.HasValue)
-        {
-            query = query.Where(x => x.DateTime >= request.StartDate.Value.ToUniversalTime());
-        }
+        query = sqlUtils.WhereAnd(
+            query, request.StartDate.HasValue,
+            x => x.DateTime >= request.StartDate!.Value.ToUniversalTime()
+        );
 
-        if (request.EndDate.HasValue)
-        {
-            query = query.Where(x => x.DateTime <= request.EndDate.Value.ToUniversalTime());
-        }
+        query = sqlUtils.WhereAnd(
+            query, request.EndDate.HasValue,
+            x => x.DateTime <= request.EndDate!.Value.ToUniversalTime()
+        );
 
-        if (!string.IsNullOrWhiteSpace(request.TransactionType) &&
-            Enum.TryParse<Domain.Inventory.Enums.TransactionType>(
-                request.TransactionType, true, out var type
-            ))
-        {
-            query = query.Where(x => x.Type == type);
-        }
+        var isTypeValid = !string.IsNullOrWhiteSpace(request.TransactionType) &&
+            Enum.TryParse<Domain.Inventory.Enums.TransactionType>(request.TransactionType, true, out var type);
+        query = sqlUtils.WhereAnd(
+            query, isTypeValid,
+            x => x.Type == Enum.Parse<Domain.Inventory.Enums.TransactionType>(request.TransactionType!, true)
+        );
 
-        if (!string.IsNullOrWhiteSpace(request.TransactionStatus) &&
-            Enum.TryParse<Domain.Inventory.Enums.TransactionStatus>(
-                request.TransactionStatus, true, out var status
-            ))
-        {
-            query = query.Where(x => x.Status == status);
-        }
+        var isStatusValid = !string.IsNullOrWhiteSpace(request.TransactionStatus) &&
+            Enum.TryParse<Domain.Inventory.Enums.TransactionStatus>(request.TransactionStatus, true, out var status);
+        query = sqlUtils.WhereAnd(
+            query, isStatusValid,
+            x => x.Status == Enum.Parse<Domain.Inventory.Enums.TransactionStatus>(request.TransactionStatus!, true)
+        );
 
         return await query
             .OrderByDescending(x => x.DateTime)
@@ -88,11 +86,11 @@ public class InventoryTransactionRepository(CashRegisterDbContext context) : IIn
             .ToPagedResponseAsync(request.Page, request.PageSize);
     }
 
-    public async Task<Shared.Inventory.Response.GetInventoryTransactionByIdResponse?> GetDetailsAsync(int id)
+    public async Task<GetInventoryTransactionByIdResponse?> GetDetailsAsync(int id)
     {
         return await context.InventoryTransactions
             .Where(x => x.Id == id)
-            .Select(x => new Shared.Inventory.Response.GetInventoryTransactionByIdResponse
+            .Select(x => new GetInventoryTransactionByIdResponse
             {
                 Id = x.Id,
                 TransactionType = x.Type.ToString(),
@@ -101,7 +99,7 @@ public class InventoryTransactionRepository(CashRegisterDbContext context) : IIn
                 Description = x.Description,
                 CreatedAt = x.DateTime,
                 TransactionStatus = x.Status.ToString(),
-                Items = x.Items.Select(i => new Shared.Inventory.Response.InventoryTransactionItemResponse
+                Items = x.Items.Select(i => new InventoryTransactionItemResponse
                 {
                     Id = i.Id,
                     ProductId = i.ProductId,

@@ -3,14 +3,15 @@ using Domain.Financial.Entities;
 using Domain.Financial.Interfaces;
 using Infrastructure.Persistence;
 using Infrastructure.Common;
+using Infrastructure.Utils.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Shared.Abstractions;
-using Shared.Response;
-using Shared.Financial.Request;
+using Domain.Shared.Abstractions;
+using Domain.Shared.Response;
+using Domain.Shared.DTOs;
 
 namespace Infrastructure.Financial.Repositories;
 
-public class CostCenterRepository(CashRegisterDbContext context) : ICostCenterRepository
+public class CostCenterRepository(CashRegisterDbContext context, ISqlUtils sqlUtils) : ICostCenterRepository
 {
     public async Task CreateAsync(CostCenter entity) => await context.CostCenters.AddAsync(entity);
 
@@ -37,14 +38,19 @@ public class CostCenterRepository(CashRegisterDbContext context) : ICostCenterRe
                 .ThenInclude(m => m.Person)
             .AsNoTracking();
         
-        if (!string.IsNullOrWhiteSpace(request.Name))
-            query = query.Where(c => c.Name.ToLower().Contains(request.Name.ToLower()));
-            
-        if (request.IsActive.HasValue)
-            query = query.Where(c => c.IsActive == request.IsActive.Value);
+        query = sqlUtils.WhereAnd(
+            query, !string.IsNullOrWhiteSpace(request.Name),
+            c => EF.Functions.ILike(c.Name, sqlUtils.SqlLikeContains(request.Name!.Trim()))
+        );
+
+        query = sqlUtils.WhereAnd(
+            query, request.IsActive.HasValue,
+            c => c.IsActive == request.IsActive!.Value
+        );
 
         return await query
             .OrderByDescending(c => c.Id)
             .ToPagedResponseAsync(request.Page, request.PageSize);
     }
 }
+

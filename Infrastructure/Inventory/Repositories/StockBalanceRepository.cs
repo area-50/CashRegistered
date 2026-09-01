@@ -2,15 +2,15 @@ using System.Linq.Expressions;
 using Domain.Inventory.Entities;
 using Domain.Inventory.Repositories;
 using Infrastructure.Persistence;
+using Infrastructure.Utils.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Shared.Inventory.Request;
-using Shared.Inventory.Response;
-using Shared.Response;
+using Domain.Shared.DTOs;
+using Domain.Shared.Response;
 using Infrastructure.Common;
 
 namespace Infrastructure.Inventory.Repositories;
 
-public class StockBalanceRepository(CashRegisterDbContext context) : IStockBalanceRepository
+public class StockBalanceRepository(CashRegisterDbContext context, ISqlUtils sqlUtils) : IStockBalanceRepository
 {
     public async Task CreateAsync(StockBalance entity)
     {
@@ -50,28 +50,25 @@ public class StockBalanceRepository(CashRegisterDbContext context) : IStockBalan
             .AsNoTracking()
             .AsQueryable();
 
-        if (!string.IsNullOrWhiteSpace(request.Term))
-        {
-            var term = request.Term.ToLower();
-            query = query.Where(x => 
-                x.Product.Name.ToLower().Contains(term) || 
-                x.Product.Sku.ToLower().Contains(term)
-            );
-        }
+        query = sqlUtils.WhereAnd(
+            query, !string.IsNullOrWhiteSpace(request.Term),
+            x => EF.Functions.ILike(x.Product.Name, sqlUtils.SqlLikeContains(request.Term!.Trim())) ||
+                 EF.Functions.ILike(x.Product.Sku, sqlUtils.SqlLikeContains(request.Term!.Trim()))
+        );
 
         query = request.WarehouseId.HasValue 
             ? query.Where(x => x.WarehouseId == request.WarehouseId.Value) 
             : query.Where(x => x.Warehouse.IsPrincipal);
 
-        if (request.CategoryId.HasValue)
-        {
-            query = query.Where(x => x.Product.CategoryId == request.CategoryId.Value);
-        }
+        query = sqlUtils.WhereAnd(
+            query, request.CategoryId.HasValue,
+            x => x.Product.CategoryId == request.CategoryId!.Value
+        );
 
-        if (request.HideEmpty == true)
-        {
-            query = query.Where(x => x.AvailableQuantity > 0);
-        }
+        query = sqlUtils.WhereAnd(
+            query, request.HideEmpty == true,
+            x => x.AvailableQuantity > 0
+        );
 
         return await query
             .OrderBy(x => x.Product.Name)
