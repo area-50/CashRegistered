@@ -1,5 +1,5 @@
-using Shared.Abstractions;
-using Shared.Response;
+using Domain.Shared.Abstractions;
+using Domain.Shared.Response;
 
 namespace Shared.Inventory.Response;
 

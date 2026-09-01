@@ -1,0 +1,15 @@
+namespace Domain.Shared.DTOs;
+
+public class InventoryTransactionItemResponse
+{
+    public int Id { get; set; }
+    public int ProductId { get; set; }
+    public string ProductName { get; set; } = string.Empty;
+    public decimal Quantity { get; set; }
+    public string UomSymbol { get; set; } = string.Empty;
+    public string UomName { get; set; } = string.Empty;
+    public int? SourceWarehouseId { get; set; }
+    public string? SourceWarehouseName { get; set; }
+    public int? DestinationWarehouseId { get; set; }
+    public string? DestinationWarehouseName { get; set; }
+}

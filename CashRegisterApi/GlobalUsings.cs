@@ -1,0 +1,16 @@
+global using Domain.Shared.Abstractions;
+global using Domain.Shared.Validations;
+global using Domain.Shared.ValueObjects;
+global using Domain.Shared.Response;
+global using Domain.Shared.Notifications;
+global using Domain.Shared.Exceptions;
+global using Domain.Shared.DTOs;
+global using Shared.Response;
+global using Shared.Inventory.Request;
+global using Shared.Inventory.Response;
+global using Shared.Financial.Request;
+global using Shared.Financial.Response;
+global using Shared.Identity.Request;
+global using Shared.Identity.Response;
+global using Shared.Security.Request;
+global using Shared.Security.Response;

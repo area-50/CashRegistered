@@ -8,5 +8,5 @@ public class CreateExpenseRequest
     
     public decimal ExpenseValue { get; set; }
 
-    public required string ExpenseDescription { get; set; }
+    public string ExpenseDescription { get; set; } = null!;
 }

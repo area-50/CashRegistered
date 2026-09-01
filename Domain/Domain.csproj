@@ -1,8 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-    <ItemGroup>
-      <ProjectReference Include="..\Shared\Shared.csproj" />
-    </ItemGroup>
+<Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
       <Compile Remove="Validations\Nullable.cs" />
@@ -11,6 +7,10 @@
 
     <ItemGroup>
       <PackageReference Include="Konscious.Security.Cryptography.Argon2" Version="1.3.1" />
+      <PackageReference Include="FluentValidation" Version="12.1.1" />
+      <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+      <PackageReference Include="Flunt" Version="2.0.5" />
+      <PackageReference Include="Flunt.Br" Version="2.0.0" />
     </ItemGroup>
 
     <PropertyGroup>

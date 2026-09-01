@@ -1,4 +1,4 @@
-using Shared.ValueObjects;
+using Domain.Shared.ValueObjects;
 
 namespace Shared.Inventory.Response;
 

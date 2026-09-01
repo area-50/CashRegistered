@@ -1,4 +1,4 @@
-using Shared.ValueObjects;
+using Domain.Shared.ValueObjects;
 
 namespace Shared.Financial.Response;
 
@@ -8,14 +8,14 @@ public class GetExpensesByCashFlowIdResponse
 
     public int UserId { get; set; }
 
-    public required Name UserName { get; set; }
+    public Name UserName { get; set; } = null!;
 
     public IEnumerable<ExpenseValues>? ExpenseValues { get; set; }
 }
 
 public class ExpenseValues
 {
-    public required string ExpenseDescription { get; set; }
+    public string ExpenseDescription { get; set; } = null!;
 
     public decimal Value { get; set; }
 }
