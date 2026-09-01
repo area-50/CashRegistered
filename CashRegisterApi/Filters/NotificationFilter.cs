@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Shared.Notifications;
+using Domain.Shared.Notifications;
 
 namespace CashRegister.Filters;
 

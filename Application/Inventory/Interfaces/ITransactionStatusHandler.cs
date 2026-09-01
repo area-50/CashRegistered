@@ -1,5 +1,5 @@
 using Domain.Inventory.Entities;
-using Shared.Inventory.Request;
+using Domain.Shared.DTOs;
 
 namespace Application.Inventory.Interfaces;
 

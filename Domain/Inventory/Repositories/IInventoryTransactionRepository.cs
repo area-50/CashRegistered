@@ -1,10 +1,8 @@
 using Domain.Inventory.Entities;
-using Shared.Abstractions;
+using Domain.Shared.Abstractions;
 
-using Shared.Response;
-using Shared.Inventory.Request;
+using Domain.Shared.Response;
 
-using Shared.Inventory.Response;
 
 namespace Domain.Inventory.Repositories;
 

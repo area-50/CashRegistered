@@ -1,5 +1,5 @@
+using Domain.Shared.Abstractions;
 using Domain.Financial.Enums;
-using Shared.Abstractions;
 
 namespace Domain.Financial.Entities;
 
@@ -112,5 +112,12 @@ public class FinancialAccount : BaseEntity
 
         if (Currency.Length > 3)
             AddNotification("Moeda", "A moeda não pode exceder 3 caracteres.");
+    }
+
+    public static bool NotExists(FinancialAccount? account, NotificationContext notificationContext)
+    {
+        if (account != null) return false;
+        notificationContext.AddNotification("ContaBancaria", "Conta financeira não encontrada.");
+        return true;
     }
 }

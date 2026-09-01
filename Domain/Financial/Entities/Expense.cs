@@ -1,8 +1,8 @@
 using Domain.Identity.Validations;
 using Domain.Financial.Validations;
 using Domain.Validations;
-using Shared.Abstractions;
-using Shared.Exceptions;
+using Domain.Shared.Abstractions;
+using Domain.Shared.Exceptions;
 
 namespace Domain.Financial.Entities;
 

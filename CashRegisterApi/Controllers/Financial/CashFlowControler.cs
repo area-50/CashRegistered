@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using Application.Financial.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Shared.Financial.Request;
+using Domain.Shared.DTOs;
 
 namespace CashRegister.Controllers.Financial;
 

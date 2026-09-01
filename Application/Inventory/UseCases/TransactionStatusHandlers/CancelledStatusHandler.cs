@@ -1,7 +1,7 @@
 using Application.Inventory.Interfaces;
 using Domain.Inventory.Entities;
 using Domain.Inventory.Enums;
-using Shared.Inventory.Request;
+using Domain.Shared.DTOs;
 
 namespace Application.Inventory.UseCases.TransactionStatusHandlers;
 

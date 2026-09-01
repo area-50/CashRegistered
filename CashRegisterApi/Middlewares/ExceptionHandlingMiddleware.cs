@@ -2,7 +2,7 @@ using System.Data.Common;
 using System.Net;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
-using Shared.Exceptions;
+using Domain.Shared.Exceptions;
 using Shared.Middleware;
 
 namespace CashRegister.Middlewares;

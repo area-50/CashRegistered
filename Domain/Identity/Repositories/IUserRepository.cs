@@ -1,7 +1,6 @@
 using Domain.Identity.Entities;
-using Shared.Abstractions;
-using Shared.Identity.Request;
-using Shared.Response;
+using Domain.Shared.Abstractions;
+using Domain.Shared.Response;
 
 namespace Domain.Identity.Repositories;
 

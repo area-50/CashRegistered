@@ -3,15 +3,15 @@ using Application.Security.Interfaces;
 using Application.Financial.Interfaces;
 using Domain.Security.Interfaces;
 using Flunt.Notifications;
-using Shared.Identity.Request;
+using Domain.Shared.DTOs;
 using Shared.Security.Request;
-using Shared.Financial.Request;
-using Shared.Response;
+using Domain.Shared.DTOs;
+using Domain.Shared.Response;
 using Shared.Identity.Response;
 using Shared.Security.Response;
 using Shared.Financial.Response;
-using Shared.Notifications;
-using Shared.Abstractions;
+using Domain.Shared.Notifications;
+using Domain.Shared.Abstractions;
 using Domain.Security.Entities;
 
 

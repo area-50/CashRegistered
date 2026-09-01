@@ -1,6 +1,6 @@
 using Domain.Financial.Enums;
 using Domain.Identity.Entities;
-using Shared.Abstractions;
+using Domain.Shared.Abstractions;
 
 namespace Domain.Financial.Entities;
 
@@ -164,5 +164,12 @@ public class FinancialDocument : BaseEntity
 
         if (!string.IsNullOrEmpty(Notes) && Notes.Length > 500)
             AddNotification("Observacoes", "As observações não podem exceder 500 caracteres.");
+    }
+
+    public static bool NotExists(FinancialDocument? document, NotificationContext notificationContext)
+    {
+        if (document != null) return false;
+        notificationContext.AddNotification("DocumentoFinanceiro", "O documento financeiro não existe.");
+        return true;
     }
 }

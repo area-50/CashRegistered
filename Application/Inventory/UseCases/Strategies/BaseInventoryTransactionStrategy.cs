@@ -1,8 +1,8 @@
 using Application.Inventory.Interfaces;
 using Domain.Inventory.Entities;
 using Domain.Inventory.Enums;
-using Shared.Inventory.Request;
-using Shared.Notifications;
+using Domain.Shared.DTOs;
+using Domain.Shared.Notifications;
 
 namespace Application.Inventory.UseCases.Strategies;
 

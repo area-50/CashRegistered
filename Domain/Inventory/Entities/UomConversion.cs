@@ -1,6 +1,6 @@
 using Flunt.Validations;
-using Shared.Abstractions;
-using Shared.Notifications;
+using Domain.Shared.Abstractions;
+using Domain.Shared.Notifications;
 
 namespace Domain.Inventory.Entities;
 

@@ -1,6 +1,6 @@
 using Domain.Identity.Entities;
 using Domain.Financial.Entities;
-using Shared.Abstractions;
+using Domain.Shared.Abstractions;
 
 namespace Domain.Financial.Repositories;
 

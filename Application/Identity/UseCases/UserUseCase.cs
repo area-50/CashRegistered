@@ -3,13 +3,13 @@ using Domain.Identity.Entities;
 using Domain.Identity.Enums;
 using Domain.Security.Interfaces;
 using Domain.Identity.Repositories;
-using Shared.Abstractions;
-using Shared.Identity.Request;
+using Domain.Shared.Abstractions;
+using Domain.Shared.DTOs;
 using Shared.Security.Request;
 using Shared.Identity.Response;
-using Shared.Response;
-using Shared.Notifications;
-using Shared.Validations;
+using Domain.Shared.Response;
+using Domain.Shared.Notifications;
+using Domain.Shared.Validations;
 
 namespace Application.Identity.UseCases;
 
@@ -102,13 +102,9 @@ public class UserUseCase(
     public async Task DeactivateUser(int userId)
     {
         var user = await repository.GetByIdAsync(userId);
-        if (user == null)
-        {
-            notificationContext.AddNotification("User", "O usuário não existe.");
-            return;
-        }
+        if (User.NotExists(user, notificationContext)) return;
         
-        user.Deactivate();
+        user!.Deactivate();
         
         repository.Update(user);
         await unitOfWork.CommitAsync();
@@ -117,13 +113,9 @@ public class UserUseCase(
     public async Task ChangePassword(int userId, ChangePasswordRequest request)
     {
         var user = await repository.GetByIdAsync(userId);
-        if (user == null)
-        {
-            notificationContext.AddNotification("User", "O usuário não existe.");
-            return;
-        }
+        if (User.NotExists(user, notificationContext)) return;
 
-        if (!user.AuthenticatePassword(hashServices, request.OldPassword))
+        if (!user!.AuthenticatePassword(hashServices, request.OldPassword))
         {
             notificationContext.AddNotifications(user.Notifications);
             return;
@@ -211,13 +203,9 @@ public class UserUseCase(
     public async Task UpdateTimezone(int userId, UpdateTimezoneRequest request)
     {
         var user = await repository.GetByIdAsync(userId);
-        if (user == null)
-        {
-            notificationContext.AddNotification("User", "O usuário não existe.");
-            return;
-        }
+        if (User.NotExists(user, notificationContext)) return;
 
-        user.UpdateTimezone(request.Timezone);
+        user!.UpdateTimezone(request.Timezone);
 
         if (user.IsInvalid)
         {
@@ -232,15 +220,11 @@ public class UserUseCase(
     public async Task<GetMeResponse> GetMe(int userId)
     {
         var user = await repository.GetByIdAsync(userId);
-        if (user == null)
-        {
-            notificationContext.AddNotification("User", "O usuário não existe.");
-            return new GetMeResponse();
-        }
+        if (User.NotExists(user, notificationContext)) return new GetMeResponse();
 
         return new GetMeResponse
         {
-            UserName = user.UserName,
+            UserName = user!.UserName,
             Name = user.Person.Name,
             Role = user.UserRole.ToString(),
             Timezone = user.Timezone

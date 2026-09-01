@@ -1,6 +1,6 @@
 using Domain.Identity.Entities;
 using Flunt.Validations;
-using Shared.Abstractions;
+using Domain.Shared.Abstractions;
 
 namespace Domain.Security.Entities;
 

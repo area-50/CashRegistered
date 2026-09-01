@@ -2,8 +2,8 @@ using Domain.Identity.Validations;
 using Domain.Financial.Validations;
 using Domain.Validations;
 using Domain.Identity.Entities;
-using Shared.Abstractions;
-using Shared.Exceptions;
+using Domain.Shared.Abstractions;
+using Domain.Shared.Exceptions;
 
 namespace Domain.Financial.Entities;
 
@@ -86,5 +86,12 @@ public class CashFlow : BaseEntity
                     errors:["O valor dever se maior que zero"]
                 );
         }
+    }
+
+    public static bool NotExists(CashFlow? cashFlow, NotificationContext notificationContext)
+    {
+        if (cashFlow != null) return false;
+        notificationContext.AddNotification("FluxoDeCaixa", "O fluxo de caixa informado não existe.");
+        return true;
     }
 }

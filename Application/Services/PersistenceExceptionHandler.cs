@@ -1,6 +1,6 @@
 using Application.Interfaces;
 using Application.Notifications;
-using Shared.Notifications;
+using Domain.Shared.Notifications;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Services;

@@ -1,7 +1,7 @@
-using Shared.Inventory.Request;
-using Shared.Response;
+using Domain.Shared.DTOs;
+using Domain.Shared.Response;
 
-using Shared.Inventory.Response;
+using Domain.Shared.DTOs;
 
 namespace Application.Inventory.Interfaces;
 
@@ -11,7 +11,7 @@ public interface IInventoryTransactionUseCase
     
     Task<PagedResponse<GetSearchInventoryTransactionResponse>> SearchAsync(SearchInventoryTransactionRequest request);
     
-    Task<Shared.Inventory.Response.GetInventoryTransactionByIdResponse?> GetByIdAsync(int id);
+    Task<GetInventoryTransactionByIdResponse?> GetByIdAsync(int id);
     
     Task<UpdateResponse> UpdateTransactionStatusAsync(int transactionId, string newStatusStr, int? sourceWarehouseId = null);
 }

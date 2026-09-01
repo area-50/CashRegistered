@@ -2,10 +2,10 @@ using Application.Identity.Interfaces;
 using Application.Financial.Interfaces;
 using Domain.Financial.Entities;
 using Domain.Financial.Repositories;
-using Shared.Abstractions;
-using Shared.Financial.Request;
+using Domain.Shared.Abstractions;
+using Domain.Shared.DTOs;
 using Shared.Financial.Response;
-using Shared.Validations;
+using Domain.Shared.Validations;
 
 namespace Application.Financial.UseCases;
 

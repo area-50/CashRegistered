@@ -1,4 +1,4 @@
-using Shared.Abstractions;
+using Domain.Shared.Abstractions;
 
 namespace Domain.Inventory.Entities;
 

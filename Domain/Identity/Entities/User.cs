@@ -1,8 +1,8 @@
 using Domain.Identity.Enums;
 using Domain.Security.Interfaces;
 using Domain.Financial.Entities;
-using Shared.Abstractions;
-using Shared.Notifications;
+using Domain.Shared.Abstractions;
+using Domain.Shared.Notifications;
 using Flunt.Notifications;
 using Flunt.Validations;
 
@@ -126,5 +126,12 @@ public class User : BaseEntity
     {
         if (targetUser == null)
             notificationContext.AddNotification("Login", "Usuário ou senha inválidos.");
+    }
+
+    public static bool NotExists(User? user, NotificationContext notificationContext)
+    {
+        if (user != null) return false;
+        notificationContext.AddNotification("Usuário", "O usuário não existe.");
+        return true;
     }
 }

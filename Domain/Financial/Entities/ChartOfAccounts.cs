@@ -1,5 +1,5 @@
 using Domain.Financial.Enums;
-using Shared.Abstractions;
+using Domain.Shared.Abstractions;
 
 namespace Domain.Financial.Entities;
 
@@ -70,5 +70,12 @@ public class ChartOfAccounts : BaseEntity
 
         if (IsSynthetic && AllowPosting)
             AddNotification("PermiteLancamentos", "Contas sintéticas não podem permitir lançamentos diretos.");
+    }
+
+    public static bool NotExists(ChartOfAccounts? account, NotificationContext notificationContext)
+    {
+        if (account != null) return false;
+        notificationContext.AddNotification("PlanoDeContas", "Plano de contas não encontrado.");
+        return true;
     }
 }

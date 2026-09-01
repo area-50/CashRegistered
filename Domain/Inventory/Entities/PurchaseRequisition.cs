@@ -1,6 +1,6 @@
 using Domain.Inventory.Enums;
 using Domain.Identity.Entities;
-using Shared.Abstractions;
+using Domain.Shared.Abstractions;
 
 namespace Domain.Inventory.Entities;
 

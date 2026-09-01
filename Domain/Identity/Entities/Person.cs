@@ -1,8 +1,8 @@
 using Domain.Identity.Enums;
 using Domain.Identity.ValueObjects;
-using Shared.Abstractions;
-using Shared.Notifications;
-using Shared.ValueObjects;
+using Domain.Shared.Abstractions;
+using Domain.Shared.Notifications;
+using Domain.Shared.ValueObjects;
 using Flunt.Notifications;
 using Flunt.Validations;
 
@@ -134,5 +134,12 @@ public class Person : BaseEntity
     {
         if (targetPerson == null)
             notificationContext.AddNotification("Pessoa", "A pessoa não existe.");
+    }
+
+    public static bool NotExists(Person? person, NotificationContext notificationContext)
+    {
+        if (person != null) return false;
+        notificationContext.AddNotification("Pessoa", "A pessoa não existe.");
+        return true;
     }
 }

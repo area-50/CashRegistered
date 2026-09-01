@@ -1,4 +1,4 @@
-using Shared.Financial.Request;
+using Domain.Shared.DTOs;
 
 namespace Application.Financial.Interfaces;
 

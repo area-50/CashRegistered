@@ -2,11 +2,11 @@ using Application.Identity.Interfaces;
 using Application.Inventory.Interfaces;
 using Domain.Inventory.Entities;
 using Domain.Inventory.Interfaces;
-using Shared.Abstractions;
-using Shared.Inventory.Request;
-using Shared.Inventory.Response;
-using Shared.Notifications;
-using Shared.Response;
+using Domain.Shared.Abstractions;
+using Domain.Shared.DTOs;
+using Domain.Shared.DTOs;
+using Domain.Shared.Notifications;
+using Domain.Shared.Response;
 
 namespace Application.Inventory.UseCases;
 
@@ -60,14 +60,11 @@ public class SupplierUseCase(
     public async Task<GetSupplierByIdResponse?> GetSupplierById(int id)
     {
         var supplier = await repository.GetByIdAsync(id);
-        if (supplier == null)
-        {
-            return null;
-        }
+        if (Supplier.NotExists(supplier, notificationContext)) return new GetSupplierByIdResponse();
 
         return new GetSupplierByIdResponse
         {
-            Id = supplier.Id,
+            Id = supplier!.Id,
             PersonId = supplier.PersonId,
             Name = supplier.Person.Name,
             TaxId = supplier.Person.TaxId,
@@ -109,36 +106,28 @@ public class SupplierUseCase(
     public async Task UpdateSupplier(int id, UpdateSupplierRequest request)
     {
         var supplier = await repository.GetByIdAsync(id);
-        if (supplier == null)
-        {
-            notificationContext.AddNotification("Supplier", "O fornecedor não existe.");
-            return;
-        }
+        if (Supplier.NotExists(supplier, notificationContext)) return;
 
         if (request.IsActive)
-            supplier.Activate();
+            supplier!.Activate();
         else
-            supplier.Deactivate();
+            supplier!.Deactivate();
 
         if (request.Person != null)
         {
-            await personUseCase.UpdatePerson(supplier.PersonId, request.Person);
+            await personUseCase.UpdatePerson(supplier!.PersonId, request.Person);
         }
 
-        repository.Update(supplier);
+        repository.Update(supplier!);
         await unitOfWork.CommitAsync();
     }
 
     public async Task DeactivateSupplier(int id)
     {
         var supplier = await repository.GetByIdAsync(id);
-        if (supplier == null)
-        {
-            notificationContext.AddNotification("Supplier", "O fornecedor não existe.");
-            return;
-        }
+        if (Supplier.NotExists(supplier, notificationContext)) return;
 
-        supplier.Deactivate();
+        supplier!.Deactivate();
 
         repository.Update(supplier);
         await unitOfWork.CommitAsync();

@@ -1,8 +1,8 @@
 using Domain.Identity.Entities;
-using Shared.Identity.Request;
+using Domain.Shared.DTOs;
 using Shared.Security.Request;
 using Shared.Identity.Response;
-using Shared.Response;
+using Domain.Shared.Response;
 
 namespace Application.Identity.Interfaces;
 

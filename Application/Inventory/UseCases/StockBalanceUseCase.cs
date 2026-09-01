@@ -1,10 +1,10 @@
 using Application.Inventory.Interfaces;
 using Domain.Inventory.Entities;
 using Domain.Inventory.Repositories;
-using Shared.Inventory.Request;
-using Shared.Inventory.Response;
-using Shared.Notifications;
-using Shared.Response;
+using Domain.Shared.DTOs;
+using Domain.Shared.DTOs;
+using Domain.Shared.Notifications;
+using Domain.Shared.Response;
 
 namespace Application.Inventory.UseCases;
 

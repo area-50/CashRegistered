@@ -1,7 +1,7 @@
 using Application.Financial.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Shared.Financial.Request;
+using Domain.Shared.DTOs;
 
 namespace CashRegisterApi.Controllers.Financial;
 

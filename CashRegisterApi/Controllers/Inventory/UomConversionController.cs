@@ -1,7 +1,7 @@
 using Application.Inventory.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Shared.Inventory.Request;
+using Domain.Shared.DTOs;
 
 namespace CashRegister.Controllers.Inventory;
 

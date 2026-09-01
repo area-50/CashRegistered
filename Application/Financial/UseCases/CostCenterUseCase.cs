@@ -2,11 +2,11 @@ using Application.Identity.Interfaces;
 using Application.Financial.Interfaces;
 using Domain.Financial.Entities;
 using Domain.Financial.Interfaces;
-using Shared.Abstractions;
-using Shared.Financial.Request;
+using Domain.Shared.Abstractions;
+using Domain.Shared.DTOs;
 using Shared.Financial.Response;
-using Shared.Notifications;
-using Shared.Response;
+using Domain.Shared.Notifications;
+using Domain.Shared.Response;
 
 namespace Application.Financial.UseCases;
 

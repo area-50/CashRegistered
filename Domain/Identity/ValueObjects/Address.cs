@@ -1,5 +1,5 @@
 using Domain.Identity.Enums;
-using Shared.Abstractions;
+using Domain.Shared.Abstractions;
 
 namespace Domain.Identity.ValueObjects;
 

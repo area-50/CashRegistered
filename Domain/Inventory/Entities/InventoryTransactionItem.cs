@@ -1,4 +1,4 @@
-using Shared.Abstractions;
+using Domain.Shared.Abstractions;
 using Flunt.Br;
 
 namespace Domain.Inventory.Entities;

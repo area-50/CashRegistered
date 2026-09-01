@@ -24,6 +24,8 @@ public static class DependencyInjectionUseCases
         services.AddScoped<IUserUseCase, UserUseCase>();
         
         services.AddScoped<ICashFlowUseCase, CashFlowUseCase>();
+        services.AddScoped<IFinancialAccountUseCase, FinancialAccountUseCase>();
+        services.AddScoped<IChartOfAccountsUseCase, ChartOfAccountsUseCase>();
         
         services.AddScoped<IExpenseUseCase, ExpenseUseCase>();
         

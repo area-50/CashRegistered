@@ -2,12 +2,12 @@ using Application.Identity.Interfaces;
 using Domain.Identity.Entities;
 using Domain.Identity.Enums;
 using Domain.Identity.Repositories;
-using Shared.Abstractions;
-using Shared.Identity.Request;
+using Domain.Shared.Abstractions;
+using Domain.Shared.DTOs;
 using Shared.Identity.Response;
-using Shared.Notifications;
-using Shared.Response;
-using Shared.Validations;
+using Domain.Shared.Notifications;
+using Domain.Shared.Response;
+using Domain.Shared.Validations;
 
 namespace Application.Identity.UseCases;
 
@@ -59,10 +59,7 @@ public class PersonUseCase(
     public async Task UpdatePerson(int id, UpdatePersonRequest request)
     {
         var person = await repository.GetByIdAsync(id);
-        Person.ValidatePersonExists(person, notificationContext);
-
-        if (person == null)
-            return;
+        if (Person.NotExists(person, notificationContext)) return;
 
         var personType = Enum.TryParse<PersonType>(request.PersonType, true, out var parsedType) 
             ? parsedType 

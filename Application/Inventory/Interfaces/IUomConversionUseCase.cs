@@ -1,6 +1,6 @@
-using Shared.Inventory.Request;
-using Shared.Inventory.Response;
-using Shared.Response;
+using Domain.Shared.DTOs;
+using Domain.Shared.DTOs;
+using Domain.Shared.Response;
 
 namespace Application.Inventory.Interfaces;
 

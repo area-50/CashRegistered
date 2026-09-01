@@ -1,5 +1,5 @@
 using Domain.Financial.Enums;
-using Shared.Abstractions;
+using Domain.Shared.Abstractions;
 
 namespace Domain.Financial.Entities;
 

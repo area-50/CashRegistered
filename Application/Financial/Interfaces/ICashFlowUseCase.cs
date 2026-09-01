@@ -1,5 +1,5 @@
 using Domain.Financial.Entities;
-using Shared.Financial.Request;
+using Domain.Shared.DTOs;
 using Shared.Financial.Response;
 
 namespace Application.Financial.Interfaces;

@@ -1,7 +1,6 @@
 using Domain.Financial.Entities;
-using Shared.Abstractions;
-using Shared.Financial.Request;
-using Shared.Response;
+using Domain.Shared.Abstractions;
+using Domain.Shared.Response;
 
 namespace Domain.Financial.Interfaces;
 
