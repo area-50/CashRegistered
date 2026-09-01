@@ -5,7 +5,7 @@ using Domain.Business.Entities;
 using Domain.Security.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Shared.Abstractions;
+using Domain.Shared.Abstractions;
 using Flunt.Notifications;
 
 namespace Infrastructure.Persistence;

@@ -19,9 +19,9 @@ public class ChartOfAccountsConfiguration : IEntityTypeConfiguration<ChartOfAcco
         
         builder.Property(x => x.Nature).HasConversion<string>().HasMaxLength(20);
         
-        builder.Property(x => x.IsSynthetic).IsRequired();
+        builder.Property(x => x.IsSynthetic).IsRequired().HasDefaultValue(true);
         
-        builder.Property(x => x.AllowPosting).IsRequired();
+        builder.Property(x => x.AllowPosting).IsRequired().HasDefaultValue(false);
 
         builder.HasIndex(x => x.Code).IsUnique();
 
