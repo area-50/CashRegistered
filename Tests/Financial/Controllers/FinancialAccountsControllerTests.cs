@@ -1,6 +1,5 @@
 using Application.Financial.Interfaces;
 using CashRegister.Controllers.Financial;
-using CashRegisterApi.Controllers.Financial;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;

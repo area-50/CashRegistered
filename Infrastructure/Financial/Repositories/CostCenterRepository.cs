@@ -52,5 +52,17 @@ public class CostCenterRepository(CashRegisterDbContext context, ISqlUtils sqlUt
             .OrderByDescending(c => c.Id)
             .ToPagedResponseAsync(request.Page, request.PageSize);
     }
-}
 
+    public async Task<bool> ExistsByNameAsync(string name, int? ignoreId = null)
+    {
+        var query = context.CostCenters.AsNoTracking()
+            .Where(c => c.Name.ToLower() == name.Trim().ToLower());
+
+        if (ignoreId.HasValue)
+        {
+            query = query.Where(c => c.Id != ignoreId.Value);
+        }
+
+        return await query.AnyAsync();
+    }
+}

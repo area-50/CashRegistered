@@ -2,48 +2,49 @@ using Application.Financial.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Domain.Shared.DTOs;
+using Shared.Financial.Request;
 
-namespace CashRegisterApi.Controllers.Financial;
+namespace CashRegister.Controllers.Financial;
 
 [ApiController]
-[Route("api/[controller]")]
-[Authorize(Policy = "LogisticsOnly")]
+[Route("api/cost-centers")]
+[Authorize]
 public class CostCentersController(ICostCenterUseCase useCase) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> Create(CreateCostCenterRequest request)
+    public async Task<IActionResult> CreateCostCenter([FromBody] CreateCostCenterRequest request)
     {
         var response = await useCase.CreateCostCenter(request);
-        if (response.Id == 0) return BadRequest();
-        return Ok(response);
-    }
-
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, UpdateCostCenterRequest request)
-    {
-        await useCase.UpdateCostCenter(id, request);
-        return NoContent();
-    }
-
-    [HttpPut("{id}/deactivate")]
-    public async Task<IActionResult> DeactivateCostCenter(int id)
-    {
-        await useCase.DeactivateCostCenter(id);
-        return NoContent();
-    }
-
-    [HttpGet("{id}/GetCostCenterById")]
-    public async Task<IActionResult> GetCostCenterById(int id)
-    {
-        var response = await useCase.GetCostCenterById(id);
-        if (response == null) return NotFound();
         return Ok(response);
     }
 
     [HttpGet("search")]
-    public async Task<IActionResult> Search([FromQuery] SearchCostCenterRequest request)
+    public async Task<IActionResult> SearchCostCenters([FromQuery] SearchCostCenterRequest request)
     {
         var response = await useCase.SearchCostCenters(request);
         return Ok(response);
+    }
+
+    [HttpGet("{id}/GetCostCenterById")]
+    public async Task<IActionResult> GetCostCenterById([FromRoute] int id)
+    {
+        var response = await useCase.GetCostCenterById(id);
+        return Ok(response);
+    }
+
+    [HttpPut("{id}/Update")]
+    public async Task<IActionResult> UpdateCostCenter(
+        [FromRoute] int id, [FromBody] UpdateCostCenterRequest request
+    )
+    {
+        var response = await useCase.UpdateCostCenter(id, request);
+        return Ok(response);
+    }
+
+    [HttpPut("{id}/deactivate")]
+    public async Task<IActionResult> DeactivateCostCenter([FromRoute] int id)
+    {
+        await useCase.DeactivateCostCenter(id);
+        return Ok();
     }
 }

@@ -4,6 +4,7 @@ using Domain.Financial.Entities;
 using Domain.Financial.Interfaces;
 using Domain.Shared.Abstractions;
 using Domain.Shared.DTOs;
+using Shared.Financial.Request;
 using Shared.Financial.Response;
 using Domain.Shared.Notifications;
 using Domain.Shared.Response;
@@ -19,14 +20,26 @@ public class CostCenterUseCase(
 {
     public async Task<CreateResponse> CreateCostCenter(CreateCostCenterRequest request)
     {
+        if (await repository.ExistsByNameAsync(request.Name))
+        {
+            notificationContext.AddNotification("Nome", "Já existe um centro de custo com este nome.");
+            return new CreateResponse { Id = 0 };
+        }
+
         var manager = await userUseCase.GetUserById(request.ManagerId);
         if (manager == null)
         {
-            notificationContext.AddNotification("ManagerId", "O usuário gerente não foi encontrado.");
-            return new CreateResponse();
+            notificationContext.AddNotification("GerenteId", "O usuário gerente não foi encontrado.");
+            return new CreateResponse { Id = 0 };
         }
 
         var costCenter = new CostCenter(request.Name, request.ManagerId);
+
+        if (costCenter.IsInvalid)
+        {
+            notificationContext.AddNotifications(costCenter.Notifications);
+            return new CreateResponse { Id = 0 };
+        }
         
         await repository.CreateAsync(costCenter);
         await unitOfWork.CommitAsync();
@@ -34,40 +47,57 @@ public class CostCenterUseCase(
         return new CreateResponse { Id = costCenter.Id };
     }
 
-    public async Task UpdateCostCenter(int id, UpdateCostCenterRequest request)
+    public async Task<UpdateResponse> UpdateCostCenter(int id, UpdateCostCenterRequest request)
     {
         var costCenter = await repository.GetByIdAsync(id);
-        if (costCenter == null)
+        if (CostCenter.NotExists(costCenter, notificationContext))
         {
-            notificationContext.AddNotification("CostCenter", "O centro de custo não existe.");
-            return;
+            return new UpdateResponse { Id = 0 };
+        }
+
+        if (await repository.ExistsByNameAsync(request.Name, ignoreId: id))
+        {
+            notificationContext.AddNotification("Nome", "Já existe um centro de custo com este nome.");
+            return new UpdateResponse { Id = 0 };
         }
 
         var manager = await userUseCase.GetUserById(request.ManagerId);
         if (manager == null)
         {
-            notificationContext.AddNotification("ManagerId", "O usuário gerente não foi encontrado.");
-            return;
+            notificationContext.AddNotification("GerenteId", "O usuário gerente não foi encontrado.");
+            return new UpdateResponse { Id = 0 };
         }
 
-        costCenter.Name = request.Name;
-        costCenter.ManagerId = request.ManagerId;
+        costCenter!.Update(request.Name, request.ManagerId);
 
-        if (request.IsActive)
+        if (request.IsActive && !costCenter.IsActive)
             costCenter.Activate();
-        else
+        else if (!request.IsActive && costCenter.IsActive)
             costCenter.Deactivate();
+
+        if (costCenter.IsInvalid)
+        {
+            notificationContext.AddNotifications(costCenter.Notifications);
+            return new UpdateResponse { Id = 0 };
+        }
 
         repository.Update(costCenter);
         await unitOfWork.CommitAsync();
+
+        return new UpdateResponse { Id = costCenter.Id };
     }
 
     public async Task DeactivateCostCenter(int id)
     {
         var costCenter = await repository.GetByIdAsync(id);
-        if (costCenter == null)
+        if (CostCenter.NotExists(costCenter, notificationContext))
         {
-            notificationContext.AddNotification("CostCenter", "O centro de custo não existe.");
+            return;
+        }
+
+        if (!costCenter!.IsActive)
+        {
+            notificationContext.AddNotification("CentroDeCusto", "O centro de custo já está desativado.");
             return;
         }
 
@@ -80,17 +110,19 @@ public class CostCenterUseCase(
     public async Task<GetCostCenterByIdResponse?> GetCostCenterById(int id)
     {
         var costCenter = await repository.GetByIdAsync(id);
-        if (costCenter == null)
+        if (CostCenter.NotExists(costCenter, notificationContext))
         {
             return null;
         }
+
+        var managerName = string.Join(" ", new[] { costCenter!.Manager?.Person?.Name?.FirstName, costCenter.Manager?.Person?.Name?.LastName }.Where(s => !string.IsNullOrWhiteSpace(s))).Trim();
 
         return new GetCostCenterByIdResponse
         {
             Id = costCenter.Id,
             Name = costCenter.Name,
             ManagerId = costCenter.ManagerId,
-            ManagerName = costCenter.Manager?.Person?.Name?.FirstName + " " + costCenter.Manager?.Person?.Name?.LastName,
+            ManagerName = managerName,
             IsActive = costCenter.IsActive
         };
     }
@@ -101,12 +133,17 @@ public class CostCenterUseCase(
 
         return new PagedResponse<GetSearchCostCenterResponse>
         {
-            Items = pagedCostCenters.Items.Select(c => new GetSearchCostCenterResponse
+            Items = pagedCostCenters.Items.Select(c =>
             {
-                Id = c.Id,
-                Name = c.Name,
-                ManagerName = c.Manager?.Person?.Name?.FirstName + " " + c.Manager?.Person?.Name?.LastName,
-                IsActive = c.IsActive
+                var managerName = string.Join(" ", new[] { c.Manager?.Person?.Name?.FirstName, c.Manager?.Person?.Name?.LastName }.Where(s => !string.IsNullOrWhiteSpace(s))).Trim();
+
+                return new GetSearchCostCenterResponse
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    ManagerName = managerName,
+                    IsActive = c.IsActive
+                };
             }),
             TotalCount = pagedCostCenters.TotalCount,
             Page = pagedCostCenters.Page,
