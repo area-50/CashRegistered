@@ -50,10 +50,10 @@ public class StockBalanceRepository(CashRegisterDbContext context, ISqlUtils sql
             .AsNoTracking()
             .AsQueryable();
 
-        query = sqlUtils.WhereAnd(
-            query, !string.IsNullOrWhiteSpace(request.Term),
-            x => EF.Functions.ILike(x.Product.Name, sqlUtils.SqlLikeContains(request.Term!.Trim())) ||
-                 EF.Functions.ILike(x.Product.Sku, sqlUtils.SqlLikeContains(request.Term!.Trim()))
+        query = sqlUtils.WhereLike(
+            query, !string.IsNullOrWhiteSpace(request.Term), request.Term,
+            x => x.Product.Name,
+            x => x.Product.Sku
         );
 
         query = request.WarehouseId.HasValue 
@@ -81,7 +81,7 @@ public class StockBalanceRepository(CashRegisterDbContext context, ISqlUtils sql
                 ProductName = x.Product.Name,
                 WarehouseId = x.WarehouseId,
                 WarehouseName = x.Warehouse.Name,
-                PhysicalQuantity = x.AvailableQuantity + x.ReservedQuantity, // Físico
+                PhysicalQuantity = x.AvailableQuantity + x.ReservedQuantity,
                 ReservedQuantity = x.ReservedQuantity,
                 AvailableQuantity = x.AvailableQuantity,
                 IsActive = x.IsActive
@@ -97,7 +97,11 @@ public class StockBalanceRepository(CashRegisterDbContext context, ISqlUtils sql
         {
             query = query.Where(x => x.WarehouseId == warehouseId.Value);
         }
-        
-        return await query.SumAsync(x => x.AvailableQuantity);
+        else
+        {
+            query = query.Where(x => x.Warehouse.IsPrincipal);
+        }
+
+        return await query.Select(x => x.AvailableQuantity).FirstOrDefaultAsync();
     }
 }

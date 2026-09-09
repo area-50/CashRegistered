@@ -47,7 +47,7 @@ public class ProductRepository(CashRegisterDbContext context, ISqlUtils sqlUtils
         throw new NotImplementedException();
     }
 
-    public async  Task<PagedResponse<Product>> SearchAsync(SearchProductRequest request)
+    public async Task<PagedResponse<Product>> SearchAsync(SearchProductRequest request)
     {
         var query = context.Products
             .Include(p => p.Category)
@@ -66,18 +66,18 @@ public class ProductRepository(CashRegisterDbContext context, ISqlUtils sqlUtils
         }
 
         query = query.AsNoTracking();
-        
-        if (string.IsNullOrWhiteSpace(request.Term) && request.CategoryId is null or 0)
-            return await query.OrderByDescending(p => p.Id).ToPagedResponseAsync(request.Page, request.PageSize);
 
-        var term = sqlUtils.SqlLikeContains(request.Term!);
-        var categoryId = request.CategoryId ?? 0;
-
-        query = query.Where(p =>
-                p.CategoryId == categoryId &&
-                (EF.Functions.ILike(p.Name, term) || EF.Functions.ILike(p.Sku, term))
+        query = sqlUtils.WhereAnd(
+            query, request.CategoryId.HasValue && request.CategoryId > 0,
+            p => p.CategoryId == request.CategoryId!.Value
         );
-    
+
+        query = sqlUtils.WhereLike(
+            query, !string.IsNullOrWhiteSpace(request.Term), request.Term,
+            p => p.Name,
+            p => p.Sku
+        );
+
         return await query.OrderByDescending(p => p.Id).ToPagedResponseAsync(request.Page, request.PageSize);
     }
 }

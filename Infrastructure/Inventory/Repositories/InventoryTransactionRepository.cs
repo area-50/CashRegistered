@@ -51,9 +51,11 @@ public class InventoryTransactionRepository(CashRegisterDbContext context, ISqlU
     {
         var query = context.InventoryTransactions.AsQueryable();
 
-        query = sqlUtils.WhereAnd(
-            query, !string.IsNullOrWhiteSpace(request.ReferenceDocument),
-            x => x.ReferenceDocument != null && EF.Functions.ILike(x.ReferenceDocument, sqlUtils.SqlLikeContains(request.ReferenceDocument!.Trim()))
+        query = sqlUtils.WhereLike(
+            query, !string.IsNullOrWhiteSpace(request.ReferenceDocument), request.ReferenceDocument,
+            x => x.ReferenceDocument,
+            x => x.Name,
+            x => x.Description
         );
 
         query = sqlUtils.WhereAnd(

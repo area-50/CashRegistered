@@ -81,6 +81,7 @@ public class CashRegisterDbContext(DbContextOptions<CashRegisterDbContext> optio
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Ignore<Notification>();
+        modelBuilder.HasPostgresExtension("pg_trgm");
 
         // Aplica todas as configurações (Configurations) definidas neste assembly
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(CashRegisterDbContext).Assembly);

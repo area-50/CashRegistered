@@ -69,6 +69,10 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         
         builder.HasIndex(x => x.Sku).IsUnique();
 
+        builder.HasIndex(p => p.Name).HasMethod("gin").HasOperators("gin_trgm_ops");
+        builder.HasIndex(p => p.Sku).HasMethod("gin").HasOperators("gin_trgm_ops");
+        builder.HasIndex(p => p.Description).HasMethod("gin").HasOperators("gin_trgm_ops");
+
         builder.HasOne(x => x.Category).WithMany(x => x.Products).HasForeignKey(x => x.CategoryId);
         builder.HasOne(x => x.BaseUom).WithMany().HasForeignKey(x => x.BaseUomId);
 
@@ -120,6 +124,10 @@ public class InventoryTransactionConfiguration : IEntityTypeConfiguration<Invent
         builder.Property(x => x.Description).HasMaxLength(500).IsRequired(false);
         
         builder.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
+
+        builder.HasIndex(t => t.ReferenceDocument).HasMethod("gin").HasOperators("gin_trgm_ops");
+        builder.HasIndex(t => t.Name).HasMethod("gin").HasOperators("gin_trgm_ops");
+        builder.HasIndex(t => t.Description).HasMethod("gin").HasOperators("gin_trgm_ops");
     }
 }
 
