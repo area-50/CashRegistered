@@ -1,4 +1,5 @@
 using Domain.Financial.Entities;
+using Domain.Financial.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -23,12 +24,43 @@ public class ChartOfAccountsConfiguration : IEntityTypeConfiguration<ChartOfAcco
         
         builder.Property(x => x.AllowPosting).IsRequired().HasDefaultValue(false);
 
+        builder.Property(x => x.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP AT TIME ZONE 'UTC'");
+
         builder.HasIndex(x => x.Code).IsUnique();
 
         builder.HasOne(x => x.ParentAccount)
             .WithMany(x => x.ChildAccounts)
             .HasForeignKey(x => x.ParentAccountId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasData(
+            new
+            {
+                Id = 1,
+                Code = "1",
+                Name = "ATIVO",
+                AccountType = AccountType.Asset,
+                Nature = AccountNature.Debit,
+                ParentAccountId = (int?)null,
+                IsSynthetic = true,
+                AllowPosting = false,
+                IsActive = true,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new
+            {
+                Id = 2,
+                Code = "2",
+                Name = "PASSIVO",
+                AccountType = AccountType.Liability,
+                Nature = AccountNature.Credit,
+                ParentAccountId = (int?)null,
+                IsSynthetic = true,
+                AllowPosting = false,
+                IsActive = true,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            }
+        );
     }
 }
 

@@ -11,4 +11,5 @@ public class UpdateChartOfAccountsRequest
     public int? ParentAccountId { get; set; }
     public bool IsSynthetic { get; set; }
     public bool AllowPosting { get; set; } = true;
+    public bool IsActive { get; set; } = true;
 }

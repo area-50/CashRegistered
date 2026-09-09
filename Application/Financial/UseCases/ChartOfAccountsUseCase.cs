@@ -159,6 +159,11 @@ public class ChartOfAccountsUseCase(
             allowPosting: request.AllowPosting
         );
 
+        if (request.IsActive)
+            account.Activate();
+        else
+            account.Deactivate();
+
         if (account.IsInvalid)
         {
             notificationContext.AddNotifications(account.Notifications);
