@@ -53,8 +53,16 @@ public class InventoryTransactionRepository(CashRegisterDbContext context, ISqlU
 
         query = sqlUtils.WhereLike(
             query, !string.IsNullOrWhiteSpace(request.ReferenceDocument), request.ReferenceDocument,
-            x => x.ReferenceDocument,
-            x => x.Name,
+            x => x.ReferenceDocument
+        );
+
+        query = sqlUtils.WhereLike(
+            query, !string.IsNullOrWhiteSpace(request.Name), request.Name,
+            x => x.Name
+        );
+
+        query = sqlUtils.WhereLike(
+            query, !string.IsNullOrWhiteSpace(request.Description), request.Description,
             x => x.Description
         );
 
