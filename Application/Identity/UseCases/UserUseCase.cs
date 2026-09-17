@@ -238,15 +238,8 @@ public class UserUseCase(
         var user = await repository.GetByIdAsync(targetUserId);
         if (User.NotExists(user, notificationContext)) return;
 
-        var existingUserByUsername = await repository.GetUserByUserName(request.UserName);
-        if (existingUserByUsername != null && existingUserByUsername.Id != targetUserId)
-        {
-            notificationContext.AddNotification("UserName", "Este nome de usuário já está em uso por outro usuário.");
-            return;
-        }
-
         var newRole = Enum.TryParse(request.Role, out UserRole role) ? role : user!.UserRole;
-        user!.AdminUpdateUser(newRole, request.UserName);
+        user!.AdminUpdateUser(newRole, user.UserName);
 
         if (request.IsActive && !user.IsActive) user.Activate();
         else if (!request.IsActive && user.IsActive) user.Deactivate();

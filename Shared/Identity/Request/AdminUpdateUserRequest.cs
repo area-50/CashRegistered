@@ -2,8 +2,6 @@ namespace Shared.Identity.Request;
 
 public class AdminUpdateUserRequest
 {
-    public string UserName { get; set; } = null!;
-    
     public string Role { get; set; } = null!;
     
     public bool IsActive { get; set; } = true;
@@ -22,3 +20,4 @@ public class AdminUpdateUserRequest
     
     public string? Gender { get; set; }
 }
+

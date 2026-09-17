@@ -274,19 +274,17 @@ public class UserUseCaseTests
 
     [Fact]
     [Trait("Category", "User Application - Admin Update")]
-    public async Task AdminUpdateUser_WhenAdminUpdatesRoleAndUsername_ShouldUpdateSuccessfully()
+    public async Task AdminUpdateUser_WhenAdminUpdatesRole_ShouldUpdateSuccessfully()
     {
         // Arrange
         var person = new Person(PersonType.Physical, "UserFirst", "UserLast", "12345678901", DateTime.Now.AddYears(-20), "user@test.com");
-        var user = new User(1, "StrongPass1234", "user.oldname", UserRole.Business);
+        var user = new User(1, "StrongPass1234", "user.name", UserRole.Business);
         typeof(User).GetProperty("Person")?.SetValue(user, person);
 
         _userRepositoryMock.Setup(x => x.GetByIdAsync(1)).ReturnsAsync(user);
-        _userRepositoryMock.Setup(x => x.GetUserByUserName("user.newname")).ReturnsAsync((User?)null);
 
         var request = new Shared.Identity.Request.AdminUpdateUserRequest
         {
-            UserName = "user.newname",
             Role = "Financial",
             IsActive = true,
             FirstName = "UserFirst",
@@ -301,7 +299,7 @@ public class UserUseCaseTests
         // Assert
         _notificationContext.IsInvalid.Should().BeFalse();
         user.UserRole.Should().Be(UserRole.Financial);
-        user.UserName.Should().Be("user.newname");
+        user.UserName.Should().Be("user.name");
         _userRepositoryMock.Verify(x => x.Update(user), Times.Once);
         _unitOfWorkMock.Verify(x => x.CommitAsync(), Times.Once);
     }
