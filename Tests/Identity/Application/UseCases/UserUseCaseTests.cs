@@ -237,4 +237,95 @@ public class UserUseCaseTests
         result.Items.Should().HaveCount(1);
         result.TotalCount.Should().Be(1);
     }
+
+    [Fact]
+    [Trait("Category", "User Application - Profile Update")]
+    public async Task UpdateUserProfile_WhenUserExists_ShouldUpdatePersonAndSave()
+    {
+        // Arrange
+        var person = new Person(PersonType.Physical, "OldFirst", "OldLast", "12345678901", DateTime.Now.AddYears(-20), "old@test.com");
+        var user = new User(1, "StrongPass1234", "user.profile", UserRole.Business);
+        typeof(User).GetProperty("Person")?.SetValue(user, person);
+
+        _userRepositoryMock.Setup(x => x.GetByIdAsync(1)).ReturnsAsync(user);
+
+        var request = new Shared.Identity.Request.UpdateUserProfileRequest
+        {
+            FirstName = "NewFirst",
+            LastName = "NewLast",
+            Birthdate = DateTime.Now.AddYears(-25),
+            Email = "new@test.com",
+            CellPhone = "11999999999",
+            Phone = "1133333333",
+            Gender = "Female"
+        };
+
+        // Act
+        await _userUseCase.UpdateUserProfile(1, request);
+
+        // Assert
+        _notificationContext.IsInvalid.Should().BeFalse();
+        user.Person.Name.FirstName.Should().Be("NewFirst");
+        user.Person.Name.LastName.Should().Be("NewLast");
+        user.Person.Email.Should().Be("new@test.com");
+        _userRepositoryMock.Verify(x => x.Update(user), Times.Once);
+        _unitOfWorkMock.Verify(x => x.CommitAsync(), Times.Once);
+    }
+
+    [Fact]
+    [Trait("Category", "User Application - Admin Update")]
+    public async Task AdminUpdateUser_WhenAdminUpdatesRoleAndUsername_ShouldUpdateSuccessfully()
+    {
+        // Arrange
+        var person = new Person(PersonType.Physical, "UserFirst", "UserLast", "12345678901", DateTime.Now.AddYears(-20), "user@test.com");
+        var user = new User(1, "StrongPass1234", "user.oldname", UserRole.Business);
+        typeof(User).GetProperty("Person")?.SetValue(user, person);
+
+        _userRepositoryMock.Setup(x => x.GetByIdAsync(1)).ReturnsAsync(user);
+        _userRepositoryMock.Setup(x => x.GetUserByUserName("user.newname")).ReturnsAsync((User?)null);
+
+        var request = new Shared.Identity.Request.AdminUpdateUserRequest
+        {
+            UserName = "user.newname",
+            Role = "Financial",
+            IsActive = true,
+            FirstName = "UserFirst",
+            LastName = "UserLast",
+            Birthdate = DateTime.Now.AddYears(-20),
+            Email = "user@test.com"
+        };
+
+        // Act
+        await _userUseCase.AdminUpdateUser(1, request);
+
+        // Assert
+        _notificationContext.IsInvalid.Should().BeFalse();
+        user.UserRole.Should().Be(UserRole.Financial);
+        user.UserName.Should().Be("user.newname");
+        _userRepositoryMock.Verify(x => x.Update(user), Times.Once);
+        _unitOfWorkMock.Verify(x => x.CommitAsync(), Times.Once);
+    }
+
+    [Fact]
+    [Trait("Category", "User Application - Admin Reset Password")]
+    public async Task AdminResetPassword_WhenValidNewPassword_ShouldUpdatePasswordSuccessfully()
+    {
+        // Arrange
+        var user = new User(1, "OldStrongPass123", "user.reset", UserRole.Business);
+        _userRepositoryMock.Setup(x => x.GetByIdAsync(1)).ReturnsAsync(user);
+        _passwordHasherMock.Setup(x => x.HashPassword("NewStrongPass123")).Returns("HashedNewPass");
+
+        var request = new Shared.Identity.Request.AdminResetPasswordRequest
+        {
+            NewPassword = "NewStrongPass123"
+        };
+
+        // Act
+        await _userUseCase.AdminResetPassword(1, request);
+
+        // Assert
+        _notificationContext.IsInvalid.Should().BeFalse();
+        _userRepositoryMock.Verify(x => x.Update(user), Times.Once);
+        _unitOfWorkMock.Verify(x => x.CommitAsync(), Times.Once);
+    }
 }

@@ -139,7 +139,9 @@ public class UserUseCase(
         var selectedUsers = allUsers.Select(
             user => new GetAllUsersResponse
             {
-                Id =  user.Id,
+                Id = user.Id,
+                UserName = user.UserName,
+                Role = user.UserRole.ToString(),
                 Name = user.Person.Name,
                 Birthdate = user.Person.Birthdate,
                 TaxId = user.Person.TaxId,
@@ -190,14 +192,103 @@ public class UserUseCase(
             Items = pagedUsers.Items.Select(u => new GetAllUsersResponse
             {
                 Id = u.Id,
+                UserName = u.UserName,
+                Role = u.UserRole.ToString(),
                 Name = u.Person.Name,
                 Birthdate = u.Person.Birthdate,
-                TaxId = u.Person.TaxId
+                TaxId = u.Person.TaxId,
+                IsActive = u.IsActive
             }),
             TotalCount = pagedUsers.TotalCount,
             Page = pagedUsers.Page,
             PageSize = pagedUsers.PageSize
         };
+    }
+
+    public async Task UpdateUserProfile(int userId, Shared.Identity.Request.UpdateUserProfileRequest request)
+    {
+        var user = await repository.GetByIdAsync(userId);
+        if (User.NotExists(user, notificationContext)) return;
+
+        user!.Person.Update(
+            personType: user.Person.PersonType,
+            firstName: request.FirstName,
+            lastName: request.LastName,
+            taxId: user.Person.TaxId,
+            birthdate: request.Birthdate,
+            email: request.Email,
+            cellPhone: request.CellPhone,
+            phone: request.Phone,
+            gender: request.Gender
+        );
+
+        if (user.Person.IsInvalid || user.IsInvalid)
+        {
+            notificationContext.AddNotifications(user.Person.Notifications);
+            notificationContext.AddNotifications(user.Notifications);
+            return;
+        }
+
+        repository.Update(user);
+        await unitOfWork.CommitAsync();
+    }
+
+    public async Task AdminUpdateUser(int targetUserId, Shared.Identity.Request.AdminUpdateUserRequest request)
+    {
+        var user = await repository.GetByIdAsync(targetUserId);
+        if (User.NotExists(user, notificationContext)) return;
+
+        var existingUserByUsername = await repository.GetUserByUserName(request.UserName);
+        if (existingUserByUsername != null && existingUserByUsername.Id != targetUserId)
+        {
+            notificationContext.AddNotification("UserName", "Este nome de usuário já está em uso por outro usuário.");
+            return;
+        }
+
+        var newRole = Enum.TryParse(request.Role, out UserRole role) ? role : user!.UserRole;
+        user!.AdminUpdateUser(newRole, request.UserName);
+
+        if (request.IsActive && !user.IsActive) user.Activate();
+        else if (!request.IsActive && user.IsActive) user.Deactivate();
+
+        user.Person.Update(
+            personType: user.Person.PersonType,
+            firstName: request.FirstName,
+            lastName: request.LastName,
+            taxId: user.Person.TaxId,
+            birthdate: request.Birthdate,
+            email: request.Email,
+            cellPhone: request.CellPhone,
+            phone: request.Phone,
+            gender: request.Gender
+        );
+
+        if (user.IsInvalid || user.Person.IsInvalid)
+        {
+            notificationContext.AddNotifications(user.Notifications);
+            notificationContext.AddNotifications(user.Person.Notifications);
+            return;
+        }
+
+        repository.Update(user);
+        await unitOfWork.CommitAsync();
+    }
+
+    public async Task AdminResetPassword(int targetUserId, Shared.Identity.Request.AdminResetPasswordRequest request)
+    {
+        var user = await repository.GetByIdAsync(targetUserId);
+        if (User.NotExists(user, notificationContext)) return;
+
+        user!.UpdatePassword(request.NewPassword, hashServices);
+
+        if (user.IsInvalid)
+        {
+            notificationContext.AddNotifications(user.Notifications);
+            return;
+        }
+
+        repository.Update(user);
+        await unitOfWork.CommitAsync();
     }
 
     public async Task UpdateTimezone(int userId, UpdateTimezoneRequest request)
@@ -227,7 +318,34 @@ public class UserUseCase(
             UserName = user!.UserName,
             Name = user.Person.Name,
             Role = user.UserRole.ToString(),
-            Timezone = user.Timezone
+            Timezone = user.Timezone,
+            Birthdate = user.Person.Birthdate,
+            TaxId = user.Person.TaxId,
+            Email = user.Person.Email,
+            CellPhone = user.Person.CellPhone,
+            Phone = user.Person.Phone,
+            Gender = user.Person.Gender.ToString()
+        };
+    }
+
+    public async Task<GetUserByIdResponse?> GetUserByIdResponse(int userId)
+    {
+        var user = await repository.GetByIdAsync(userId);
+        if (User.NotExists(user, notificationContext)) return null;
+
+        return new GetUserByIdResponse
+        {
+            Id = user!.Id,
+            UserName = user.UserName,
+            Role = user.UserRole.ToString(),
+            IsActive = user.IsActive,
+            Name = user.Person.Name,
+            Birthdate = user.Person.Birthdate,
+            TaxId = user.Person.TaxId,
+            Email = user.Person.Email,
+            CellPhone = user.Person.CellPhone,
+            Phone = user.Person.Phone,
+            Gender = user.Person.Gender.ToString()
         };
     }
 

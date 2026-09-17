@@ -1,5 +1,5 @@
-using CashRegisterApi.Controllers.Identity;
 using Application.Identity.Interfaces;
+using CashRegister.Controllers.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using FluentAssertions;

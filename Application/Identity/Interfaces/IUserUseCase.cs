@@ -20,6 +20,8 @@ public interface IUserUseCase
     
     Task<User?> GetUserById(int userId);
     
+    Task<GetUserByIdResponse?> GetUserByIdResponse(int userId);
+    
     Task<User> GetValidUserById(int userId);
     
     Task<User> GetValidUserByEmail(string email);
@@ -31,6 +33,12 @@ public interface IUserUseCase
     Task<PagedResponse<GetAllUsersResponse>> SearchUsers(SearchUserRequest request);
     
     Task<GetMeResponse> GetMe(int userId);
+
+    Task UpdateUserProfile(int userId, Shared.Identity.Request.UpdateUserProfileRequest request);
+
+    Task AdminUpdateUser(int targetUserId, Shared.Identity.Request.AdminUpdateUserRequest request);
+
+    Task AdminResetPassword(int targetUserId, Shared.Identity.Request.AdminResetPasswordRequest request);
     
     Task<IEnumerable<GetTimezoneResponse>> GetTimezones();
 }

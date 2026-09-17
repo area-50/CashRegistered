@@ -1,10 +1,8 @@
-using System.Threading.Tasks;
 using Application.Identity.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Domain.Shared.DTOs;
 
-namespace CashRegisterApi.Controllers.Identity;
+namespace CashRegister.Controllers.Identity;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -19,7 +17,7 @@ public class PersonController(IPersonUseCase person) : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize]
     public async Task<IActionResult> GetPeople()
     {
         var response = await person.GetAllPeople();

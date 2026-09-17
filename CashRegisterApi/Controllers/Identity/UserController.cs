@@ -1,16 +1,13 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Application.Identity.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Domain.Shared.DTOs;
-using Shared.Security.Request;
 
 namespace CashRegister.Controllers.Identity;
 
-[Route("api/[controller]")]
 [ApiController]
+[Route("api/[controller]")]
 public class UserController(IUserUseCase user) : ControllerBase
 {
     [HttpPost]
@@ -36,6 +33,15 @@ public class UserController(IUserUseCase user) : ControllerBase
     public async Task<IActionResult> Search([FromQuery] SearchUserRequest request)
     {
         var result = await user.SearchUsers(request);
+        return Ok(result);
+    }
+
+    [HttpGet("{id}")]
+    [Authorize(Policy = "AdminOnly")]
+    public async Task<IActionResult> GetUserById(int id)
+    {
+        var result = await user.GetUserByIdResponse(id);
+        if (result == null) return NotFound();
         return Ok(result);
     }
 
@@ -77,6 +83,35 @@ public class UserController(IUserUseCase user) : ControllerBase
         {
             Data = response
         });
+    }
+
+    [HttpPut("profile")]
+    [Authorize]
+    public async Task<IActionResult> UpdateUserProfile([FromBody] Shared.Identity.Request.UpdateUserProfileRequest request)
+    {
+        var userIdString = User.FindFirstValue(JwtRegisteredClaimNames.Sub)
+                           ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+        
+        if (!int.TryParse(userIdString, out int userId)) return Unauthorized();
+
+        await user.UpdateUserProfile(userId, request);
+        return Ok();
+    }
+
+    [HttpPut("{id}/admin-update")]
+    [Authorize(Policy = "AdminOnly")]
+    public async Task<IActionResult> AdminUpdateUser([FromRoute] int id, [FromBody] Shared.Identity.Request.AdminUpdateUserRequest request)
+    {
+        await user.AdminUpdateUser(id, request);
+        return Ok();
+    }
+
+    [HttpPut("{id}/admin-reset-password")]
+    [Authorize(Policy = "AdminOnly")]
+    public async Task<IActionResult> AdminResetPassword([FromRoute] int id, [FromBody] Shared.Identity.Request.AdminResetPasswordRequest request)
+    {
+        await user.AdminResetPassword(id, request);
+        return Ok();
     }
 
     [HttpPut("timezone")]

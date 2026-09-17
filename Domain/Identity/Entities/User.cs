@@ -51,6 +51,17 @@ public class User : BaseEntity
             Timezone = timezone;
     }
 
+    public void AdminUpdateUser(UserRole newRole, string newUserName)
+    {
+        UserRole = newRole;
+        if (!string.IsNullOrWhiteSpace(newUserName))
+            UserName = newUserName;
+
+        ClearNotifications();
+        Validate();
+        RegisterUpdate();
+    }
+
     private void Validate()
     {
         var contract = new Contract<Notification>()
