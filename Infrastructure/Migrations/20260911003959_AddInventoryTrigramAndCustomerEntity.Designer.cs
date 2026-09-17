@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(CashRegisterDbContext))]
-    [Migration("20260909225613_AddTrigramSearchIndexesToInventory")]
-    partial class AddTrigramSearchIndexesToInventory
+    [Migration("20260911003959_AddInventoryTrigramAndCustomerEntity")]
+    partial class AddInventoryTrigramAndCustomerEntity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -827,6 +827,41 @@ namespace Infrastructure.Migrations
                     b.ToTable("PaymentTransactions", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Identity.Entities.Customer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal?>("CreditLimit")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("PersonId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PersonId");
+
+                    b.ToTable("Customers", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Identity.Entities.Person", b =>
                 {
                     b.Property<int>("Id")
@@ -836,7 +871,7 @@ namespace Infrastructure.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("Birthdate")
-                        .HasColumnType("timestamp");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CellPhone")
                         .HasMaxLength(20)
@@ -893,6 +928,33 @@ namespace Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("People", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Identity.Entities.Supplier", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("PersonId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PersonId");
+
+                    b.ToTable("Suppliers", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Identity.Entities.User", b =>
@@ -1300,9 +1362,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("Sku")
                         .IsUnique();
 
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Sku"), "gin");
-                    NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex("Sku"), new[] { "gin_trgm_ops" });
-
                     b.ToTable("Products", (string)null);
                 });
 
@@ -1508,34 +1567,6 @@ namespace Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("StockBalances", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Inventory.Entities.Supplier", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<int>("PersonId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PersonId")
-                        .IsUnique();
-
-                    b.ToTable("Suppliers", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Inventory.Entities.Tag", b =>
@@ -1987,6 +2018,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("JournalEntry");
                 });
 
+            modelBuilder.Entity("Domain.Identity.Entities.Customer", b =>
+                {
+                    b.HasOne("Domain.Identity.Entities.Person", "Person")
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Person");
+                });
+
             modelBuilder.Entity("Domain.Identity.Entities.Person", b =>
                 {
                     b.OwnsOne("Domain.Shared.ValueObjects.Name", "Name", b1 =>
@@ -2013,6 +2055,17 @@ namespace Infrastructure.Migrations
 
                     b.Navigation("Name")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Identity.Entities.Supplier", b =>
+                {
+                    b.HasOne("Domain.Identity.Entities.Person", "Person")
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Person");
                 });
 
             modelBuilder.Entity("Domain.Identity.Entities.User", b =>
@@ -2152,7 +2205,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Inventory.Entities.PurchaseOrder", b =>
                 {
-                    b.HasOne("Domain.Inventory.Entities.Supplier", "Supplier")
+                    b.HasOne("Domain.Identity.Entities.Supplier", "Supplier")
                         .WithMany("PurchaseOrders")
                         .HasForeignKey("SupplierId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2252,17 +2305,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Warehouse");
                 });
 
-            modelBuilder.Entity("Domain.Inventory.Entities.Supplier", b =>
-                {
-                    b.HasOne("Domain.Identity.Entities.Person", "Person")
-                        .WithOne()
-                        .HasForeignKey("Domain.Inventory.Entities.Supplier", "PersonId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Person");
-                });
-
             modelBuilder.Entity("Domain.Inventory.Entities.UomConversion", b =>
                 {
                     b.HasOne("Domain.Inventory.Entities.UnitOfMeasure", "FromUom")
@@ -2351,6 +2393,11 @@ namespace Infrastructure.Migrations
                     b.Navigation("Addresses");
                 });
 
+            modelBuilder.Entity("Domain.Identity.Entities.Supplier", b =>
+                {
+                    b.Navigation("PurchaseOrders");
+                });
+
             modelBuilder.Entity("Domain.Identity.Entities.User", b =>
                 {
                     b.Navigation("CashFlow");
@@ -2386,11 +2433,6 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Inventory.Entities.PurchaseRequisition", b =>
                 {
                     b.Navigation("Items");
-                });
-
-            modelBuilder.Entity("Domain.Inventory.Entities.Supplier", b =>
-                {
-                    b.Navigation("PurchaseOrders");
                 });
 
             modelBuilder.Entity("Domain.Inventory.Entities.Warehouse", b =>
