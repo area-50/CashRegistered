@@ -1,7 +1,7 @@
 using Domain.Identity.Entities;
 using Domain.Shared.Abstractions;
 
-namespace Domain.Inventory.Entities;
+namespace Domain.Identity.Entities;
 
 public class Supplier : BaseEntity
 {
@@ -16,8 +16,8 @@ public class Supplier : BaseEntity
     
     public Person Person { get; set; }
     
-    public ICollection<PurchaseOrder> PurchaseOrders { get; set; } = new List<PurchaseOrder>();
-
+    public ICollection<Domain.Inventory.Entities.PurchaseOrder> PurchaseOrders { get; set; } = new List<Domain.Inventory.Entities.PurchaseOrder>();
+    
     public static bool NotExists(Supplier? supplier, NotificationContext notificationContext)
     {
         if (supplier != null) return false;

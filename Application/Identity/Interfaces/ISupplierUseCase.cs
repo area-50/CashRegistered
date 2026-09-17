@@ -1,8 +1,9 @@
-using Domain.Shared.DTOs;
+using Shared.Identity.Request;
+using Shared.Identity.Response;
 using Domain.Shared.DTOs;
 using Domain.Shared.Response;
 
-namespace Application.Inventory.Interfaces;
+namespace Application.Identity.Interfaces;
 
 public interface ISupplierUseCase
 {

@@ -1,14 +1,14 @@
 using Application.Identity.Interfaces;
-using Application.Inventory.Interfaces;
-using Domain.Inventory.Entities;
-using Domain.Inventory.Interfaces;
+using Domain.Identity.Entities;
+using Domain.Identity.Repositories;
 using Domain.Shared.Abstractions;
-using Domain.Shared.DTOs;
 using Domain.Shared.DTOs;
 using Domain.Shared.Notifications;
 using Domain.Shared.Response;
+using Shared.Identity.Request;
+using Shared.Identity.Response;
 
-namespace Application.Inventory.UseCases;
+namespace Application.Identity.UseCases;
 
 public class SupplierUseCase(
     ISupplierRepository repository,
@@ -69,7 +69,7 @@ public class SupplierUseCase(
             Name = supplier.Person.Name,
             TaxId = supplier.Person.TaxId,
             IsActive = supplier.IsActive,
-            Person = new PersonDto
+            Person = new PersonResponse
             {
                 PersonType = supplier.Person.PersonType.ToString(),
                 Birthdate = supplier.Person.Birthdate.ToString("yyyy-MM-dd"),
@@ -93,6 +93,7 @@ public class SupplierUseCase(
             Items = pagedSuppliers.Items.Select(s => new GetSearchSupplierResponse
             {
                 Id = s.Id,
+                PersonId = s.PersonId,
                 Name = s.Person.Name,
                 TaxId = s.Person.TaxId,
                 IsActive = s.IsActive

@@ -1,48 +1,50 @@
-using Application.Inventory.Interfaces;
+using Application.Identity.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Domain.Shared.DTOs;
 
-namespace CashRegister.Controllers.Inventory;
+namespace CashRegister.Controllers.Identity;
 
-[Route("api/[controller]")]
 [ApiController]
-[Authorize(Policy = "LogisticsOnly")]
+[Route("api/[controller]")]
 public class SupplierController(ISupplierUseCase supplierUseCase) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> CreateSupplier([FromBody] CreateSupplierRequest request)
+    [Authorize(Policy = "LogisticsOnly")]
+    public async Task<IActionResult> Create([FromBody] CreateSupplierRequest request)
     {
         var response = await supplierUseCase.CreateSupplier(request);
         return Ok(response);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetSupplierById(int id)
+    [Authorize(Policy = "LogisticsOnly")]
+    public async Task<IActionResult> GetById(int id)
     {
         var response = await supplierUseCase.GetSupplierById(id);
-        if (response == null) return NotFound();
         return Ok(response);
     }
 
     [HttpGet("Search")]
-    public async Task<IActionResult> SearchSuppliers([FromQuery] SearchSupplierRequest request)
+    [Authorize]
+    public async Task<IActionResult> Search([FromQuery] SearchSupplierRequest request)
     {
         var response = await supplierUseCase.SearchSuppliers(request);
         return Ok(response);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateSupplier(int id, [FromBody] UpdateSupplierRequest request)
+    [Authorize(Policy = "LogisticsOnly")]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateSupplierRequest request)
     {
         await supplierUseCase.UpdateSupplier(id, request);
-        return Ok();
+        return NoContent();
     }
 
     [HttpPut("{id}/deactivate")]
-    public async Task<IActionResult> DeactivateSupplier(int id)
+    [Authorize(Policy = "LogisticsOnly")]
+    public async Task<IActionResult> Deactivate(int id)
     {
         await supplierUseCase.DeactivateSupplier(id);
-        return Ok();
+        return NoContent();
     }
 }

@@ -1,3 +1,4 @@
+using Domain.Identity.Entities;
 using Domain.Inventory.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -70,7 +71,6 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.HasIndex(x => x.Sku).IsUnique();
 
         builder.HasIndex(p => p.Name).HasMethod("gin").HasOperators("gin_trgm_ops");
-        builder.HasIndex(p => p.Sku).HasMethod("gin").HasOperators("gin_trgm_ops");
         builder.HasIndex(p => p.Description).HasMethod("gin").HasOperators("gin_trgm_ops");
 
         builder.HasOne(x => x.Category).WithMany(x => x.Products).HasForeignKey(x => x.CategoryId);
@@ -145,16 +145,6 @@ public class InventoryTransactionItemConfiguration : IEntityTypeConfiguration<In
         builder.HasOne(x => x.SourceWarehouse).WithMany().HasForeignKey(x => x.SourceWarehouseId);
         builder.HasOne(x => x.DestinationWarehouse).WithMany().HasForeignKey(x => x.DestinationWarehouseId);
         builder.HasOne(x => x.Uom).WithMany().HasForeignKey(x => x.UomId);
-    }
-}
-
-public class SupplierConfiguration : IEntityTypeConfiguration<Supplier>
-{
-    public void Configure(EntityTypeBuilder<Supplier> builder)
-    {
-        builder.ToTable("Suppliers");
-        builder.HasKey(x => x.Id);
-        builder.HasOne(x => x.Person).WithOne().HasForeignKey<Supplier>(x => x.PersonId);
     }
 }
 

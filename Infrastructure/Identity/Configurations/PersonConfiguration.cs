@@ -44,7 +44,7 @@ public class PersonConfiguration : IEntityTypeConfiguration<Person>
         
         builder.Property(person => person.Birthdate)
             .IsRequired()
-            .HasColumnType("timestamp");
+            .HasColumnType("timestamp with time zone");
         
         builder.Property(person => person.Email)
             .IsRequired()

@@ -1,3 +1,4 @@
+using Domain.Identity.Entities;
 using Domain.Inventory.Enums;
 using Domain.Shared.Abstractions;
 
