@@ -205,7 +205,7 @@ public class UserUseCase(
         };
     }
 
-    public async Task UpdateUserProfile(int userId, Shared.Identity.Request.UpdateUserProfileRequest request)
+    public async Task UpdateUserProfile(int userId, UpdateUserProfileRequest request)
     {
         var user = await repository.GetByIdAsync(userId);
         if (User.NotExists(user, notificationContext)) return;
@@ -233,7 +233,7 @@ public class UserUseCase(
         await unitOfWork.CommitAsync();
     }
 
-    public async Task AdminUpdateUser(int targetUserId, Shared.Identity.Request.AdminUpdateUserRequest request)
+    public async Task AdminUpdateUser(int targetUserId, AdminUpdateUserRequest request)
     {
         var user = await repository.GetByIdAsync(targetUserId);
         if (User.NotExists(user, notificationContext)) return;
@@ -267,7 +267,7 @@ public class UserUseCase(
         await unitOfWork.CommitAsync();
     }
 
-    public async Task AdminResetPassword(int targetUserId, Shared.Identity.Request.AdminResetPasswordRequest request)
+    public async Task AdminResetPassword(int targetUserId, AdminResetPasswordRequest request)
     {
         var user = await repository.GetByIdAsync(targetUserId);
         if (User.NotExists(user, notificationContext)) return;

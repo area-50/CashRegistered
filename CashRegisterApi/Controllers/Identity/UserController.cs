@@ -100,7 +100,7 @@ public class UserController(IUserUseCase user) : ControllerBase
 
     [HttpPut("{id}/admin-update")]
     [Authorize(Policy = "AdminOnly")]
-    public async Task<IActionResult> AdminUpdateUser([FromRoute] int id, [FromBody] Shared.Identity.Request.AdminUpdateUserRequest request)
+    public async Task<IActionResult> AdminUpdateUser([FromRoute] int id, [FromBody] AdminUpdateUserRequest request)
     {
         await user.AdminUpdateUser(id, request);
         return Ok();

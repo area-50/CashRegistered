@@ -58,8 +58,25 @@ public class User : BaseEntity
             UserName = newUserName;
 
         ClearNotifications();
-        Validate();
+        ValidateUpdate();
         RegisterUpdate();
+    }
+
+    private void ValidateUpdate()
+    {
+        var contract = new Contract<Notification>()
+            .Requires()
+            .IsNotNullOrEmpty(
+                UserName,
+                "Nome de usuário",
+                "O nome de usuário é obrigatório."
+            )
+            .IsGreaterThan(
+                UserName?.Length ?? 0,
+                3, "Nome de usuário",
+                "O nome de usuário deve ter mais que 3 caracteres."
+            );
+        AddNotifications(contract.Notifications);
     }
 
     private void Validate()
