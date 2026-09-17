@@ -1,7 +1,6 @@
-using System.Threading.Tasks;
 using Application.Financial.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Domain.Shared.DTOs;
 
 namespace CashRegister.Controllers.Financial;
 
@@ -11,6 +10,7 @@ namespace CashRegister.Controllers.Financial;
 public class ExpenseController(IExpenseUseCase expenseUseCase) : ControllerBase
 {
     [HttpPost]
+    [Authorize(Policy = "FinancialOnly")]
     public async Task<IActionResult> CreateExpense(CreateExpenseRequest request)
     {
         await expenseUseCase.CreateExpense(request);

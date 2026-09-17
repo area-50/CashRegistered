@@ -6,10 +6,10 @@ namespace CashRegister.Controllers.Financial;
 
 [ApiController]
 [Route("api/financial-accounts")]
-[Authorize]
 public class FinancialAccountsController(IFinancialAccountUseCase useCase) : ControllerBase
 {
     [HttpPost]
+    [Authorize(Policy = "FinancialOnly")]
     public async Task<IActionResult> CreateFinancialAccount([FromBody] CreateFinancialAccountRequest request)
     {
         var response = await useCase.CreateFinancialAccount(request);
@@ -17,6 +17,7 @@ public class FinancialAccountsController(IFinancialAccountUseCase useCase) : Con
     }
 
     [HttpGet("search")]
+    [Authorize(Policy = "FinancialOnly")]
     public async Task<IActionResult> SearchFinancialAccounts([FromQuery] SearchFinancialAccountRequest request)
     {
         var response = await useCase.SearchFinancialAccounts(request);
@@ -24,6 +25,7 @@ public class FinancialAccountsController(IFinancialAccountUseCase useCase) : Con
     }
 
     [HttpGet("{id}/GetFinancialAccountById")]
+    [Authorize(Policy = "FinancialOnly")]
     public async Task<IActionResult> GetFinancialAccountById([FromRoute] int id)
     {
         var response = await useCase.GetFinancialAccountById(id);
@@ -31,6 +33,7 @@ public class FinancialAccountsController(IFinancialAccountUseCase useCase) : Con
     }
 
     [HttpPut("{id}/Update")]
+    [Authorize(Policy = "FinancialOnly")]
     public async Task<IActionResult> UpdateFinancialAccount(
         [FromRoute] int id, [FromBody] UpdateFinancialAccountRequest request
     )
@@ -40,6 +43,7 @@ public class FinancialAccountsController(IFinancialAccountUseCase useCase) : Con
     }
 
     [HttpPut("{id}/deactivate")]
+    [Authorize(Policy = "FinancialOnly")]
     public async Task<IActionResult> DeactivateFinancialAccount([FromRoute] int id)
     {
         await useCase.DeactivateFinancialAccount(id);

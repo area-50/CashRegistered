@@ -15,11 +15,13 @@ public class CashRegisterDbContext(DbContextOptions<CashRegisterDbContext> optio
     // Identity
     public DbSet<User> Users { get; set; }
     public DbSet<Person> People { get; set; }
+    public DbSet<Customer> Customers { get; set; }
 
     // Security
     public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     // Financial
+    public DbSet<FinancialConfiguration> FinancialConfigurations { get; set; }
     public DbSet<CashFlow> CashFlows { get; set; }
     public DbSet<Expense> Expenses { get; set; }
     public DbSet<CostCenter> CostCenters { get; set; }

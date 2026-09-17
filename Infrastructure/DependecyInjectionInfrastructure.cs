@@ -1,7 +1,6 @@
 using Domain.Financial.Repositories;
 using Domain.Identity.Repositories;
 using Domain.Inventory.Repositories;
-using Domain.Inventory.Interfaces;
 using Domain.Financial.Interfaces;
 using Domain.Security.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -49,6 +48,8 @@ public static class DependencyInjectionInfrastructure
         services.AddScoped<IExpenseRepository, ExpenseRepository>();
         
         services.AddScoped<IPersonRepository, PersonRepository>();
+        services.AddScoped<ISupplierRepository, SupplierRepository>();
+        services.AddScoped<ICustomerRepository, CustomerRepository>();
 
         services.AddScoped<IUnitOfMeasureRepository, UnitOfMeasureRepository>();
         
@@ -67,10 +68,11 @@ public static class DependencyInjectionInfrastructure
         services.AddScoped<IInventoryTransactionRepository, InventoryTransactionRepository>();
         
 
-        services.AddScoped<ISupplierRepository, SupplierRepository>();
         services.AddScoped<ICostCenterRepository, CostCenterRepository>();
         services.AddScoped<IFinancialAccountRepository, FinancialAccountRepository>();
         services.AddScoped<IChartOfAccountsRepository, ChartOfAccountsRepository>();
+        services.AddScoped<IFinancialDocumentRepository, FinancialDocumentRepository>();
+        services.AddScoped<IFinancialConfigurationRepository, FinancialConfigurationRepository>();
 
         services.AddSingleton<INotificationService, NotificationService>();
 

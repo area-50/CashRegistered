@@ -8,10 +8,10 @@ namespace CashRegister.Controllers.Financial;
 
 [ApiController]
 [Route("api/cost-centers")]
-[Authorize]
 public class CostCentersController(ICostCenterUseCase useCase) : ControllerBase
 {
     [HttpPost]
+    [Authorize(Policy = "FinancialOnly")]
     public async Task<IActionResult> CreateCostCenter([FromBody] CreateCostCenterRequest request)
     {
         var response = await useCase.CreateCostCenter(request);
@@ -19,6 +19,7 @@ public class CostCentersController(ICostCenterUseCase useCase) : ControllerBase
     }
 
     [HttpGet("search")]
+    [Authorize(Policy = "FinancialOnly")]
     public async Task<IActionResult> SearchCostCenters([FromQuery] SearchCostCenterRequest request)
     {
         var response = await useCase.SearchCostCenters(request);
@@ -26,6 +27,7 @@ public class CostCentersController(ICostCenterUseCase useCase) : ControllerBase
     }
 
     [HttpGet("{id}/GetCostCenterById")]
+    [Authorize(Policy = "FinancialOnly")]
     public async Task<IActionResult> GetCostCenterById([FromRoute] int id)
     {
         var response = await useCase.GetCostCenterById(id);
@@ -33,6 +35,7 @@ public class CostCentersController(ICostCenterUseCase useCase) : ControllerBase
     }
 
     [HttpPut("{id}/Update")]
+    [Authorize(Policy = "FinancialOnly")]
     public async Task<IActionResult> UpdateCostCenter(
         [FromRoute] int id, [FromBody] UpdateCostCenterRequest request
     )
@@ -42,6 +45,7 @@ public class CostCentersController(ICostCenterUseCase useCase) : ControllerBase
     }
 
     [HttpPut("{id}/deactivate")]
+    [Authorize(Policy = "FinancialOnly")]
     public async Task<IActionResult> DeactivateCostCenter([FromRoute] int id)
     {
         await useCase.DeactivateCostCenter(id);

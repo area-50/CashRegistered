@@ -26,6 +26,8 @@ public static class DependencyInjectionUseCases
         services.AddScoped<ICashFlowUseCase, CashFlowUseCase>();
         services.AddScoped<IFinancialAccountUseCase, FinancialAccountUseCase>();
         services.AddScoped<IChartOfAccountsUseCase, ChartOfAccountsUseCase>();
+        services.AddScoped<IFinancialDocumentUseCase, FinancialDocumentUseCase>();
+        services.AddScoped<IFinancialConfigurationUseCase, FinancialConfigurationUseCase>();
         
         services.AddScoped<IExpenseUseCase, ExpenseUseCase>();
         
@@ -34,6 +36,8 @@ public static class DependencyInjectionUseCases
         services.AddScoped<ITokenGenerator, TokenService>();
         
         services.AddScoped<IPersonUseCase, PersonUseCase>();
+        services.AddScoped<ISupplierUseCase, SupplierUseCase>();
+        services.AddScoped<ICustomerUseCase, CustomerUseCase>();
 
         services.AddScoped<IUnitOfMeasureUseCase, UnitOfMeasureUseCase>();
         
@@ -75,8 +79,6 @@ public static class DependencyInjectionUseCases
         });
 
         services.AddScoped<IInventoryRequisitionUseCase, InventoryRequisitionUseCase>();
-        
-        services.AddScoped<ISupplierUseCase, SupplierUseCase>();
         
         services.AddScoped<IPersistenceExceptionStrategy, UniqueConstraintStrategy>();
         

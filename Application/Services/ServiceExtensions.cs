@@ -2,6 +2,8 @@ using System.Reflection;
 using System.Text;
 using Application.Decorators;
 using Application.Services;
+using Application.Identity.Interfaces;
+using Application.Identity.UseCases;
 using Application.Inventory.Interfaces;
 using Application.Inventory.UseCases;
 using Application.Financial.Interfaces;
@@ -80,6 +82,12 @@ public static class ServiceExtensions
                 ))
             
             .AddPolicy("ComercialOnly", policy => 
+            policy.RequireRole(
+                UserRole.Business.ToString(), 
+                UserRole.Admin.ToString()
+            ))
+
+            .AddPolicy("CommercialOnly", policy => 
             policy.RequireRole(
                 UserRole.Business.ToString(), 
                 UserRole.Admin.ToString()

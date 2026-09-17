@@ -79,8 +79,17 @@ public class FinancialAccount : BaseEntity
 
     public void DebitBalance(decimal amount)
     {
-        if (amount < 0)
-            AddNotification("Valor", "O valor a debitar não pode ser negativo.");
+        if (amount <= 0)
+        {
+            AddNotification("Valor", "O valor a debitar não pode ser negativo ou zero.");
+            return;
+        }
+
+        if (CurrentBalance < amount)
+        {
+            AddNotification("Saldo", "Saldo insuficiente na conta financeira selecionada para realizar o débito.");
+            return;
+        }
 
         CurrentBalance -= amount;
         RegisterUpdate();

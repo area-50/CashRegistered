@@ -21,4 +21,6 @@ The entry point of the ASP.NET Core application.
 - Use `ActionResult<T>` for consistent API responses.
 - Ensure proper use of HTTP verbs (GET, POST, PUT, DELETE).
 - Verify CORS and authentication settings in `Program.cs` when changing frontend/backend interaction.
+- **Soberania de Identidade do Token JWT**: Endpoints para ações do próprio usuário logado (`GetMe`, `ChangePassword`, `UpdateUserProfile`, `UpdateTimezone`) JAMAIS devem aceitar o ID do usuário como parâmetro de rota ou body. O ID DEVE ser extraído pelo controller exclusivamente do Token JWT (`User.FindFirstValue(ClaimTypes.NameIdentifier)`).
+- **Autorização por Método Obrigatória**: É estritamente PROIBIDO declarar atributos `[Authorize]` sobre a classe do Controller. Todas as permissões DEVEM ser explicitadas individualmente sobre cada método/action do controller.
 - não use repository nos controllers
