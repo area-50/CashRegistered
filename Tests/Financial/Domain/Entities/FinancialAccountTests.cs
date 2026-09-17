@@ -80,6 +80,20 @@ public class FinancialAccountTests
     }
 
     [Fact]
+    public void DebitBalance_InsufficientBalance_ShouldAddNotification()
+    {
+        // Arrange
+        var account = new FinancialAccount("Caixa Tesouraria", FinancialAccountType.Cash, chartOfAccountsId: 10, initialBalance: 100.00m);
+
+        // Act
+        account.DebitBalance(500.00m);
+
+        // Assert
+        Assert.True(account.IsInvalid);
+        Assert.Contains(account.Notifications, n => n.Key == "Saldo" && n.Message.Contains("Saldo insuficiente"));
+    }
+
+    [Fact]
     public void Constructor_InvalidData_ShouldAddNotifications()
     {
         // Act

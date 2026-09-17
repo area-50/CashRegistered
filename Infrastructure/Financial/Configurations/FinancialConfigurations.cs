@@ -117,6 +117,10 @@ public class FinancialDocumentConfiguration : IEntityTypeConfiguration<Financial
         
         builder.Property(x => x.FineAmount).HasPrecision(18, 2);
         
+        builder.Property(x => x.FineRate).HasPrecision(5, 2).HasDefaultValue(0m);
+        
+        builder.Property(x => x.InterestDailyRate).HasPrecision(7, 4).HasDefaultValue(0m);
+        
         builder.Property(x => x.NetAmount).HasPrecision(18, 2);
         
         builder.Property(x => x.PaidAmount).HasPrecision(18, 2);

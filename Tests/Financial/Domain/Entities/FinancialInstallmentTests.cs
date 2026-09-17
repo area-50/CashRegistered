@@ -105,4 +105,68 @@ public class FinancialInstallmentTests
         Assert.Equal(InstallmentStatus.Canceled, installment.Status);
         Assert.False(installment.IsInvalid);
     }
+
+
+    [Fact]
+    public void CalculateSettlement_PaymentDateOnTime_ShouldTriggerGuardClause1AndDoNothing()
+    {
+        // Arrange
+        var dueDate = DateTime.UtcNow.AddDays(5);
+        var installment = new FinancialInstallment(installmentNumber: 1, dueDate: dueDate, amount: 1000.00m);
+        var paymentDate = DateTime.UtcNow; // Payment date before due date
+
+        // Act
+        var calc = installment.CalculateSettlement(paymentDate, fineRate: 2.0m, interestDailyRate: 0.1m);
+
+        // Assert
+        Assert.False(calc.IsOverdue);
+        Assert.Equal(0, calc.OverdueDays);
+        Assert.Equal(0m, calc.CalculatedFineAmount);
+        Assert.Equal(0m, calc.DailyInterestAmount);
+        Assert.Equal(0m, calc.CalculatedInterestAmount);
+        Assert.Equal(1000.00m, calc.SuggestedAmountPaid);
+    }
+
+    [Fact]
+    public void CalculateSettlement_PaymentDateOverdueButRatesZero_ShouldTriggerGuardClause2AndDoNothingToCalculatedRates()
+    {
+        // Arrange
+        var dueDate = DateTime.UtcNow.AddDays(-10);
+        var installment = new FinancialInstallment(installmentNumber: 1, dueDate: dueDate, amount: 1000.00m);
+        var paymentDate = DateTime.UtcNow;
+
+        // Act
+        var calc = installment.CalculateSettlement(paymentDate, fineRate: 0m, interestDailyRate: 0m);
+
+        // Assert
+        Assert.True(calc.IsOverdue);
+        Assert.Equal(10, calc.OverdueDays);
+        Assert.Equal(0m, calc.CalculatedFineAmount);
+        Assert.Equal(0m, calc.DailyInterestAmount);
+        Assert.Equal(0m, calc.CalculatedInterestAmount);
+        Assert.Equal(1000.00m, calc.SuggestedAmountPaid);
+    }
+
+    [Fact]
+    public void CalculateSettlement_PaymentDateOverdueWithRates_ShouldCalculateFineAndDailyInterest()
+    {
+        // Arrange
+        var dueDate = DateTime.UtcNow.AddDays(-10);
+        var installment = new FinancialInstallment(installmentNumber: 1, dueDate: dueDate, amount: 1000.00m);
+        var paymentDate = DateTime.UtcNow;
+
+        // Fine: 2% of 1000 = 20.00
+        // Daily Interest: 0.1% of 1000 = 1.00/day * 10 days = 10.00
+        // Act
+        var calc = installment.CalculateSettlement(paymentDate, fineRate: 2.0m, interestDailyRate: 0.1m);
+
+        // Assert
+        Assert.True(calc.IsOverdue);
+        Assert.Equal(10, calc.OverdueDays);
+        Assert.Equal(20.00m, calc.CalculatedFineAmount);
+        Assert.Equal(1.00m, calc.DailyInterestAmount);
+        Assert.Equal(10.00m, calc.CalculatedInterestAmount);
+        Assert.Equal(1030.00m, calc.SuggestedAmountPaid);
+    }
 }
+

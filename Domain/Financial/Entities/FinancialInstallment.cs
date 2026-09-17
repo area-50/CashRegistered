@@ -48,7 +48,7 @@ public class FinancialInstallment : BaseEntity
         Validate();
     }
 
-    internal void AttachToDocument(int documentId)
+    public void AttachToDocument(int documentId)
     {
         FinancialDocumentId = documentId;
     }
@@ -74,14 +74,7 @@ public class FinancialInstallment : BaseEntity
 
         decimal netRequiredAmount = (Amount + InterestAmount + FineAmount) - DiscountAmount;
 
-        if (PaidAmount >= netRequiredAmount)
-        {
-            Status = InstallmentStatus.Paid;
-        }
-        else
-        {
-            Status = InstallmentStatus.Partial;
-        }
+        Status = PaidAmount >= netRequiredAmount ? InstallmentStatus.Paid : InstallmentStatus.Partial;
 
         RegisterUpdate();
     }
@@ -90,6 +83,98 @@ public class FinancialInstallment : BaseEntity
     {
         Status = InstallmentStatus.Canceled;
         RegisterUpdate();
+    }
+
+    public InstallmentSettlementCalculation CalculateSettlement(
+        DateTime paymentDate,
+        decimal fineRate,
+        decimal interestDailyRate,
+        decimal? overrideDiscount = null,
+        decimal? overrideInterest = null,
+        decimal? overrideFine = null)
+    {
+        decimal remainingBalance = Math.Max(0, Amount - PaidAmount);
+
+        // 🛡️ TRAVA 1: Se o pagamento for na data de vencimento ou anterior, NADA É FEITO.
+        if (paymentDate.Date <= DueDate.Date)
+        {
+            decimal discount = overrideDiscount ?? 0m;
+            decimal fine = overrideFine ?? 0m;
+            decimal interest = overrideInterest ?? 0m;
+
+            return new InstallmentSettlementCalculation
+            {
+                InstallmentId = Id,
+                IsOverdue = false,
+                OverdueDays = 0,
+                RemainingBalance = remainingBalance,
+                DailyInterestAmount = 0m,
+                CalculatedFineAmount = 0m,
+                CalculatedInterestAmount = 0m,
+                FineToApply = fine,
+                InterestToApply = interest,
+                DiscountToApply = discount,
+                SuggestedAmountPaid = Math.Max(0, remainingBalance + fine + interest - discount)
+            };
+        }
+
+        // 🛡️ TRAVA 2: Se está em atraso, porém as taxas do documento estão zeradas, NADA É FEITO no cálculo de juros/multa.
+        if (fineRate <= 0m && interestDailyRate <= 0m)
+        {
+            int daysOverdue = (paymentDate.Date - DueDate.Date).Days;
+            decimal discount = overrideDiscount ?? 0m;
+            decimal fine = overrideFine ?? 0m;
+            decimal interest = overrideInterest ?? 0m;
+
+            return new InstallmentSettlementCalculation
+            {
+                InstallmentId = Id,
+                IsOverdue = true,
+                OverdueDays = daysOverdue,
+                RemainingBalance = remainingBalance,
+                DailyInterestAmount = 0m,
+                CalculatedFineAmount = 0m,
+                CalculatedInterestAmount = 0m,
+                FineToApply = fine,
+                InterestToApply = interest,
+                DiscountToApply = discount,
+                SuggestedAmountPaid = Math.Max(0, remainingBalance + fine + interest - discount)
+            };
+        }
+
+        // 🧮 SOMENTE SE PASSOU PELAS DUAS TRAVAS: Executa os cálculos.
+        int overdueDays = (paymentDate.Date - DueDate.Date).Days;
+
+        decimal calculatedFine = fineRate > 0m
+            ? Math.Round(remainingBalance * (fineRate / 100m), 2)
+            : 0m;
+
+        decimal dailyInterest = interestDailyRate > 0m
+            ? Math.Round(remainingBalance * (interestDailyRate / 100m), 2)
+            : 0m;
+
+        decimal calculatedInterest = Math.Round(dailyInterest * overdueDays, 2);
+
+        decimal fineToApply = overrideFine ?? calculatedFine;
+        decimal interestToApply = overrideInterest ?? calculatedInterest;
+        decimal discountToApply = overrideDiscount ?? 0m;
+
+        decimal suggestedAmountPaid = Math.Max(0, remainingBalance + fineToApply + interestToApply - discountToApply);
+
+        return new InstallmentSettlementCalculation
+        {
+            InstallmentId = Id,
+            IsOverdue = true,
+            OverdueDays = overdueDays,
+            RemainingBalance = remainingBalance,
+            DailyInterestAmount = dailyInterest,
+            CalculatedFineAmount = calculatedFine,
+            CalculatedInterestAmount = calculatedInterest,
+            FineToApply = fineToApply,
+            InterestToApply = interestToApply,
+            DiscountToApply = discountToApply,
+            SuggestedAmountPaid = Math.Round(suggestedAmountPaid, 2)
+        };
     }
 
     private void Validate()
@@ -103,3 +188,19 @@ public class FinancialInstallment : BaseEntity
             AddNotification("ValorNominal", "O valor nominal da parcela deve ser maior que zero.");
     }
 }
+
+public struct InstallmentSettlementCalculation
+{
+    public int InstallmentId { get; set; }
+    public bool IsOverdue { get; set; }
+    public int OverdueDays { get; set; }
+    public decimal RemainingBalance { get; set; }
+    public decimal DailyInterestAmount { get; set; }
+    public decimal CalculatedFineAmount { get; set; }
+    public decimal CalculatedInterestAmount { get; set; }
+    public decimal FineToApply { get; set; }
+    public decimal InterestToApply { get; set; }
+    public decimal DiscountToApply { get; set; }
+    public decimal SuggestedAmountPaid { get; set; }
+}
+

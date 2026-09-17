@@ -7,32 +7,57 @@ namespace Domain.Financial.Entities;
 public class FinancialDocument : BaseEntity
 {
     public DocumentType DocumentType { get; private set; }
+    
     public string DocumentNumber { get; private set; } = null!;
+    
     public int PersonId { get; private set; }
+    
     public int ChartOfAccountsId { get; private set; }
+    
     public int? CostCenterId { get; private set; }
+    
     public DateTime IssueDate { get; private set; }
+    
     public DateTime DueDate { get; private set; }
+    
     public decimal TotalAmount { get; private set; }
+    
     public decimal DiscountAmount { get; private set; }
+    
     public decimal InterestAmount { get; private set; }
+    
     public decimal FineAmount { get; private set; }
+    
+    public decimal FineRate { get; private set; }
+    
+    public decimal InterestDailyRate { get; private set; }
+    
     public decimal NetAmount { get; private set; }
+    
     public decimal PaidAmount { get; private set; }
+    
     public DocumentStatus Status { get; private set; }
+    
     public int? ApprovalUserId { get; private set; }
+    
     public DateTime? ApprovedAt { get; private set; }
+    
     public string? Notes { get; private set; }
 
     public Person Person { get; private set; } = null!;
+    
     public ChartOfAccounts ChartOfAccounts { get; private set; } = null!;
+    
     public CostCenter? CostCenter { get; private set; }
+    
     public User? ApprovalUser { get; private set; }
 
     private readonly List<FinancialInstallment> _installments = new();
+    
     public IReadOnlyCollection<FinancialInstallment> Installments => _installments.AsReadOnly();
 
     private readonly List<FinancialCostCenterAllocation> _allocations = new();
+    
     public IReadOnlyCollection<FinancialCostCenterAllocation> Allocations => _allocations.AsReadOnly();
 
     protected FinancialDocument() { }
@@ -49,6 +74,8 @@ public class FinancialDocument : BaseEntity
         decimal discountAmount = 0,
         decimal interestAmount = 0,
         decimal fineAmount = 0,
+        decimal fineRate = 0,
+        decimal interestDailyRate = 0,
         string? notes = null,
         bool requiresApproval = false)
     {
@@ -63,6 +90,8 @@ public class FinancialDocument : BaseEntity
         DiscountAmount = discountAmount;
         InterestAmount = interestAmount;
         FineAmount = fineAmount;
+        FineRate = fineRate;
+        InterestDailyRate = interestDailyRate;
         Notes = notes;
         PaidAmount = 0;
         NetAmount = (totalAmount + interestAmount + fineAmount) - discountAmount;
